@@ -42,6 +42,23 @@ TheBoringNotch : Liquid Glass is a personal remake of **[Boring Notch](https://g
 
 > This is not a fork and is not affiliated with TheBoredTeam. All credit for the original app goes to them. The project stays under the same **GPL-3.0** license.
 
+### Quick install
+
+Download the latest release, no Xcode needed:
+
+1. Open the **[latest release](https://github.com/jimmyxan/TheBoringNotch-LiquidGlass/releases/latest)** and download `TheBoringNotch-x.y.z.zip` under *Assets*.
+2. Unzip it and drag **TheBoringNotch.app** into your **Applications** folder.
+3. If the original Boring Notch is installed, quit it and move it to the Trash: both apps share the same bundle identifier.
+4. Open the app. It is not notarized by Apple, so the first launch is blocked: go to **System Settings › Privacy & Security**, scroll down and click **Open Anyway** next to TheBoringNotch, then confirm.
+   Prefer the Terminal? Run `xattr -dr com.apple.quarantine /Applications/TheBoringNotch.app` and open the app normally.
+5. The app lives in the notch and in the **menu bar** (no Dock icon). Use the menu bar item to open **Settings** or **Quit**.
+6. Grant permissions when you need them:
+   - **Accessibility**, to replace the system volume and brightness HUD (Settings › HUDs).
+   - **Audio capture**, asked the first time you move a fader in the Mixer.
+   - **Calendar**, to show your events.
+
+To update, download the newest release and replace the app in Applications. Afterwards, remove and re-add the app under *Accessibility*: macOS ties the permission to the exact build.
+
 ### What's new
 
 | | |
@@ -95,7 +112,7 @@ Good to know:
 - Mixer: macOS 14.2 or later.
 - Xcode 26 to build.
 
-### Build
+### Build from source
 
 ```bash
 git clone https://github.com/jimmyxan/TheBoringNotch-LiquidGlass.git
@@ -120,6 +137,23 @@ Select the `boringNotch` scheme and press **Run**. Accessibility permission is r
 TheBoringNotch : Liquid Glass è un remake personale di **[Boring Notch](https://github.com/TheBoredTeam/boring.notch)** di TheBoredTeam. Mantiene tutto ciò che rende ottimo l'originale (musica, calendario, shelf, HUD, animazioni fluide in stile Apple) e ridisegna l'aspetto per l'era Liquid Glass, con qualche funzione nuova.
 
 > Non è un fork e non è affiliato a TheBoredTeam. Tutto il merito dell'app originale va a loro. Il progetto resta sotto la stessa licenza **GPL-3.0**.
+
+### Installazione rapida
+
+Scarica l'ultima release, senza bisogno di Xcode:
+
+1. Apri l'**[ultima release](https://github.com/jimmyxan/TheBoringNotch-LiquidGlass/releases/latest)** e scarica `TheBoringNotch-x.y.z.zip` sotto *Assets*.
+2. Estrai lo zip e trascina **TheBoringNotch.app** nella cartella **Applicazioni**.
+3. Se hai installato il Boring Notch originale, chiudilo e spostalo nel Cestino: le due app usano lo stesso identificativo.
+4. Apri l'app. Non è notarizzata da Apple, quindi il primo avvio viene bloccato: vai in **Impostazioni di Sistema › Privacy e sicurezza**, scorri in basso e premi **Apri comunque** accanto a TheBoringNotch, poi conferma.
+   Preferisci il Terminale? Esegui `xattr -dr com.apple.quarantine /Applications/TheBoringNotch.app` e apri l'app normalmente.
+5. L'app vive nel notch e nella **barra dei menu** (nessuna icona nel Dock). Dall'icona nella barra dei menu apri le **Impostazioni** o **esci**.
+6. Concedi i permessi quando servono:
+   - **Accessibilità**, per sostituire le HUD di volume e luminosità di sistema (Impostazioni › HUDs).
+   - **Cattura audio**, richiesta la prima volta che muovi uno slider nel Mixer.
+   - **Calendario**, per mostrare i tuoi eventi.
+
+Per aggiornare, scarica la release più recente e sostituisci l'app in Applicazioni. Poi rimuovi e riaggiungi l'app in *Accessibilità*: macOS lega il permesso alla build esatta.
 
 ### Novità
 
@@ -174,7 +208,7 @@ Da sapere:
 - Mixer: macOS 14.2 o successivo.
 - Xcode 26 per compilare.
 
-### Compilazione
+### Compilazione dal codice
 
 ```bash
 git clone https://github.com/jimmyxan/TheBoringNotch-LiquidGlass.git
