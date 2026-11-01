@@ -15,7 +15,7 @@
 
 <br>
 
-<img src="docs/home.png" alt="Open notch with Liquid Glass: Now Playing and calendar over the desktop" width="860">
+<img src="docs/home.png" alt="Open notch with Liquid Glass: Now Playing, calendar and weather widgets" width="860">
 
 <br><br>
 
@@ -28,6 +28,16 @@
     <td align="center" width="40%">
       <img src="docs/hud-settings.png" alt="HUD settings with color presets and live preview" width="85%"><br>
       <sub><b>HUD</b>: color presets, custom color, live preview</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="60%">
+      <img src="docs/macremote.png" alt="MacRemote tab: pairing QR code with Copy link, New code and Stop" width="100%"><br>
+      <sub><b>MacRemote</b>: control the Mac from your iPhone, paired from the notch</sub>
+    </td>
+    <td align="center" width="40%">
+      <img src="docs/widgets-settings.png" alt="Widgets settings: drag-and-drop preview of the notch with a tray of available widgets" width="85%"><br>
+      <sub><b>Widgets</b>: drag and drop to build your home</sub>
     </td>
   </tr>
 </table>
@@ -56,6 +66,9 @@ Download the latest release, no Xcode needed:
    - **Accessibility**, to replace the system volume and brightness HUD (Settings › HUDs).
    - **Audio capture**, asked the first time you move a fader in the Mixer.
    - **Calendar**, to show your events.
+   - **Bluetooth**, for the battery widget (AirPods, headphones, speakers).
+   - **Location**, for the weather widget. Without it the weather uses an approximate position from your IP address.
+   - **Accessibility for MacRemote**, the first time you start it from the notch (it is a separate helper app).
 
 To update, download the newest release and replace the app in Applications. Afterwards, remove and re-add the app under *Accessibility*: macOS ties the permission to the exact build.
 
@@ -71,6 +84,34 @@ To update, download the newest release and replace the app in Applications. Afte
 | **Mixer** | A new notch tab with one vertical fader per app playing sound (0–150%), native and driver-free. See below. |
 | **Spotify everywhere** | Shows what you are playing on your phone, speakers or TV, even with the Spotify app closed on the Mac. Works with **Spotify Free**, through Last.fm. |
 | **Quiet idle state** | When nothing plays on any device, a calm Spotify card replaces the placeholder track. |
+| **Home widgets** | Build the home like an iPhone widget stack: Music, Calendar, Bluetooth battery, Weather and Mirror. Up to 1 large + 2 small; the notch resizes to fit. |
+| **Bluetooth battery** | AirPods and Beats show left, right and case; other headphones and speakers show one percentage. |
+| **Weather** | Apple-style card with the sky and motion of the current condition. Can stand in for the battery widget while nothing is connected. |
+| **MacRemote** | A new notch tab that starts **[MacRemote](https://github.com/jimmyxan/MacRemote)** and shows the QR code to pair your iPhone. Bundled with the app. |
+
+### Home widgets
+
+<img src="docs/weather-offline.png" alt="Home widgets with the weather widget offline: the Claude Code mascot crying under a rain cloud" width="860">
+
+The home of the open notch is a set of widgets you choose and arrange in **Settings › Widgets**:
+
+- **Drag and drop on a live preview**: drag a widget from the tray into the notch, drop it on another widget to swap them (or to replace it when there is no room), drag it back to the tray to remove it. A list below does the same for keyboard users.
+- **Size budget**: Music is large, the others are small, and the home holds up to **1 large + 2 small**. The notch grows and shrinks with what you put in it.
+- **Bluetooth battery**: an animated ring with the level of the connected device. Click it with AirPods or Beats connected to open a detail view with **Left**, **Right** and **Case** (the case only appears while it is nearby and reporting).
+- **Weather**: data from [Open-Meteo](https://open-meteo.com) (free, no API key). Rain, snow, thunderstorms, clouds and fog are animated, gently. Location comes from Location Services, or from your IP address if you don't allow it; you can grant it again or refresh from Settings. With no internet connection the widget shows the Claude Code mascot crying under a rain cloud (above).
+- **Weather when nothing is connected** (on by default): while no Bluetooth device is connected, the battery widget is replaced by the weather, and it comes back as soon as a device connects.
+
+### MacRemote
+
+The **MacRemote** tab, next to the Mixer, integrates **[MacRemote](https://github.com/jimmyxan/MacRemote)** ([macremote.it](https://www.macremote.it)), my app to control the Mac from an iPhone over the local network: volume, media, brightness, keyboard, touchpad and more, from a web page in Safari. Nothing to install on the phone.
+
+- **Included in every install**: MacRemote is built from its own repository (a git submodule) and shipped inside `TheBoringNotch.app`. There is nothing else to download.
+- **Start → scan → done**: press **Start MacRemote**, scan the QR code with the iPhone camera (same Wi-Fi), and the remote opens.
+- **Copy link**, **New code** (phones paired with the old link stop working) and **Stop** (MacRemote quits completely).
+- If you already run a standalone MacRemote, the tab uses that one instead of starting a second copy.
+- MacRemote runs as its own app, because it needs permissions the sandboxed notch cannot have (simulating keys and pointer, screen preview). macOS asks for **Accessibility** for MacRemote the first time.
+
+If you find MacRemote useful, a ⭐ on [its repository](https://github.com/jimmyxan/MacRemote) helps.
 
 ### Mixer: native OpenSoundSource engine
 
@@ -115,10 +156,12 @@ Good to know:
 ### Build from source
 
 ```bash
-git clone https://github.com/jimmyxan/TheBoringNotch-LiquidGlass.git
+git clone --recursive https://github.com/jimmyxan/TheBoringNotch-LiquidGlass.git
 cd TheBoringNotch-LiquidGlass
 open boringNotch.xcodeproj
 ```
+
+Already cloned without `--recursive`? Run `git submodule update --init`. The build compiles the MacRemote submodule with Swift Package Manager and embeds it.
 
 Select the `boringNotch` scheme and press **Run**. Accessibility permission is required to replace the system HUD.
 
@@ -128,6 +171,8 @@ Select the `boringNotch` scheme and press **Run**. Accessibility permission is r
 
 - **[Boring Notch](https://github.com/TheBoredTeam/boring.notch)** by TheBoredTeam and contributors: the original app this remake is built on.
 - **[OpenSoundSource](https://github.com/jimmyxan/OpenSoundSource)**: the per-app volume engine behind the Mixer.
+- **[MacRemote](https://github.com/jimmyxan/MacRemote)** ([macremote.it](https://www.macremote.it)): the iPhone remote behind the MacRemote tab, included as a submodule.
+- Weather data by **[Open-Meteo](https://open-meteo.com)** (CC BY 4.0); IP location fallback by [ipwho.is](https://ipwho.is).
 - Licensed under **GPL-3.0**, like the original. See [LICENSE](LICENSE) and [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES).
 
 ---
@@ -152,6 +197,9 @@ Scarica l'ultima release, senza bisogno di Xcode:
    - **Accessibilità**, per sostituire le HUD di volume e luminosità di sistema (Impostazioni › HUDs).
    - **Cattura audio**, richiesta la prima volta che muovi uno slider nel Mixer.
    - **Calendario**, per mostrare i tuoi eventi.
+   - **Bluetooth**, per il widget batteria (AirPods, cuffie, casse).
+   - **Posizione**, per il widget meteo. Senza permesso il meteo usa una posizione approssimata dall'indirizzo IP.
+   - **Accessibilità per MacRemote**, la prima volta che lo avvii dal notch (è un'app di supporto separata).
 
 Per aggiornare, scarica la release più recente e sostituisci l'app in Applicazioni. Poi rimuovi e riaggiungi l'app in *Accessibilità*: macOS lega il permesso alla build esatta.
 
@@ -167,6 +215,32 @@ Per aggiornare, scarica la release più recente e sostituisci l'app in Applicazi
 | **Mixer** | Una nuova tab del notch con uno slider verticale per ogni app che emette suono (0–150%), nativo e senza driver. Vedi sotto. |
 | **Spotify ovunque** | Mostra cosa ascolti su telefono, casse o TV, anche con l'app Spotify chiusa sul Mac. Funziona con **Spotify Free**, tramite Last.fm. |
 | **Stato di attesa discreto** | Quando non suona nulla su nessun dispositivo, una scheda Spotify sobria sostituisce il brano segnaposto. |
+| **Widget nella home** | Componi la home come i widget di iPhone: Musica, Calendario, Batteria Bluetooth, Meteo e Specchio. Fino a 1 grande + 2 piccoli; il notch si adatta. |
+| **Batteria Bluetooth** | AirPods e Beats mostrano sinistra, destra e custodia; altre cuffie e casse una sola percentuale. |
+| **Meteo** | Scheda in stile Apple con il cielo e il movimento della condizione attuale. Può prendere il posto della batteria quando non c'è nulla collegato. |
+| **MacRemote** | Una nuova tab del notch che avvia **[MacRemote](https://github.com/jimmyxan/MacRemote)** e mostra il QR per associare l'iPhone. Inclusa nell'app. |
+
+### Widget nella home
+
+La home del notch aperto è un insieme di widget che scegli e disponi in **Impostazioni › Widgets**:
+
+- **Trascina e rilascia su un'anteprima dal vivo**: trascina un widget dal vassoio nel notch, rilascialo su un altro per scambiarli (o per sostituirlo se manca spazio), riportalo nel vassoio per toglierlo. Una lista sotto fa lo stesso da tastiera.
+- **Spazio a disposizione**: Musica è grande, gli altri sono piccoli, e la home contiene fino a **1 grande + 2 piccoli**. Il notch si allarga e si restringe in base a cosa contiene.
+- **Batteria Bluetooth**: un anello animato con la carica del dispositivo collegato. Con AirPods o Beats un clic apre il dettaglio con **Sinistra**, **Destra** e **Custodia** (la custodia compare solo se è vicina e comunica la carica).
+- **Meteo**: dati da [Open-Meteo](https://open-meteo.com) (gratuito, senza chiave). Pioggia, neve, temporali, nuvole e nebbia sono animati, con discrezione. La posizione arriva da Localizzazione o, se non la concedi, dall'indirizzo IP; dalle Impostazioni puoi concederla di nuovo o aggiornare. Senza connessione internet il widget mostra la mascotte di Claude Code che piange sotto una nuvola di pioggia (immagine sopra).
+- **Meteo quando non c'è nulla collegato** (attivo di default): finché nessun dispositivo Bluetooth è collegato, al posto della batteria compare il meteo, che torna batteria appena un dispositivo si collega.
+
+### MacRemote
+
+La tab **MacRemote**, accanto al Mixer, integra **[MacRemote](https://github.com/jimmyxan/MacRemote)** ([macremote.it](https://www.macremote.it)), la mia app per comandare il Mac dall'iPhone sulla rete locale: volume, media, luminosità, tastiera, touchpad e altro, da una pagina web in Safari. Niente da installare sul telefono.
+
+- **Inclusa in ogni installazione**: MacRemote viene compilata dal suo repository (un submodule git) e inserita dentro `TheBoringNotch.app`. Non c'è altro da scaricare.
+- **Avvia → inquadra → fatto**: premi **Start MacRemote**, inquadra il QR con la fotocamera dell'iPhone (stessa Wi-Fi) e si apre il telecomando.
+- **Copy link**, **New code** (i telefoni associati con il vecchio link smettono di funzionare) e **Stop** (MacRemote si chiude del tutto).
+- Se usi già MacRemote installata a parte, la tab usa quella invece di avviarne una seconda copia.
+- MacRemote gira come app a sé perché le servono permessi che il notch in sandbox non può avere (simulare tasti e puntatore, anteprima dello schermo). La prima volta macOS chiede il permesso **Accessibilità** per MacRemote.
+
+Se MacRemote ti è utile, una ⭐ sul [suo repository](https://github.com/jimmyxan/MacRemote) aiuta.
 
 ### Mixer: motore nativo di OpenSoundSource
 
@@ -211,10 +285,12 @@ Da sapere:
 ### Compilazione dal codice
 
 ```bash
-git clone https://github.com/jimmyxan/TheBoringNotch-LiquidGlass.git
+git clone --recursive https://github.com/jimmyxan/TheBoringNotch-LiquidGlass.git
 cd TheBoringNotch-LiquidGlass
 open boringNotch.xcodeproj
 ```
+
+Hai già clonato senza `--recursive`? Esegui `git submodule update --init`. La build compila il submodule MacRemote con Swift Package Manager e lo include nell'app.
 
 Seleziona lo schema `boringNotch` e premi **Run**. Per sostituire le HUD di sistema serve il permesso Accessibilità.
 
@@ -224,4 +300,6 @@ Seleziona lo schema `boringNotch` e premi **Run**. Per sostituire le HUD di sist
 
 - **[Boring Notch](https://github.com/TheBoredTeam/boring.notch)** di TheBoredTeam e collaboratori: l'app originale su cui si basa questo remake.
 - **[OpenSoundSource](https://github.com/jimmyxan/OpenSoundSource)**: il motore di volume per singola app dietro il Mixer.
+- **[MacRemote](https://github.com/jimmyxan/MacRemote)** ([macremote.it](https://www.macremote.it)): il telecomando per iPhone dietro la tab MacRemote, incluso come submodule.
+- Dati meteo di **[Open-Meteo](https://open-meteo.com)** (CC BY 4.0); posizione da IP di riserva tramite [ipwho.is](https://ipwho.is).
 - Licenza **GPL-3.0**, come l'originale. Vedi [LICENSE](LICENSE) e [THIRD_PARTY_LICENSES](THIRD_PARTY_LICENSES).
