@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/icon.png" alt="TheBoringNotch : Liquid Glass icon" width="128" height="128">
+
 # TheBoringNotch : Liquid Glass
 
 **A Liquid Glass remake of [Boring Notch](https://github.com/TheBoredTeam/boring.notch) for macOS 26 and later.**<br>
