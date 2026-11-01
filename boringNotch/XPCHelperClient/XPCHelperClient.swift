@@ -243,6 +243,54 @@ final class XPCHelperClient: NSObject {
     }
 }
 
+// MARK: - MacRemote
+extension XPCHelperClient {
+    nonisolated func macRemoteToken() async -> String? {
+        do {
+            let service = await MainActor.run { ensureRemoteService() }
+            return try await service.withContinuation { service, continuation in
+                service.macRemoteToken { continuation.resume(returning: $0) }
+            }
+        } catch {
+            return nil
+        }
+    }
+
+    nonisolated func setMacRemoteToken(_ token: String) async -> Bool {
+        do {
+            let service = await MainActor.run { ensureRemoteService() }
+            return try await service.withContinuation { service, continuation in
+                service.setMacRemoteToken(token) { continuation.resume(returning: $0) }
+            }
+        } catch {
+            return false
+        }
+    }
+
+    /// nil on success, otherwise the error message.
+    nonisolated func launchMacRemote(at path: String) async -> String? {
+        do {
+            let service = await MainActor.run { ensureRemoteService() }
+            return try await service.withContinuation { service, continuation in
+                service.launchMacRemote(at: path) { continuation.resume(returning: $0) }
+            }
+        } catch {
+            return error.localizedDescription
+        }
+    }
+
+    nonisolated func stopMacRemote() async -> Bool {
+        do {
+            let service = await MainActor.run { ensureRemoteService() }
+            return try await service.withContinuation { service, continuation in
+                service.stopMacRemote { continuation.resume(returning: $0) }
+            }
+        } catch {
+            return false
+        }
+    }
+}
+
 extension Notification.Name {
     static let accessibilityAuthorizationChanged = Notification.Name("accessibilityAuthorizationChanged")
 }

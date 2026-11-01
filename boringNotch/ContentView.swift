@@ -36,6 +36,14 @@ struct ContentView: View {
     @Default(.useMusicVisualizer) var useMusicVisualizer
 
     @Default(.showNotHumanFace) var showNotHumanFace
+    @Default(.homeWidgets) var homeWidgets
+
+    /// Open width: home follows its widgets, the other tabs keep the classic size.
+    private var openNotchWidth: CGFloat {
+        coordinator.currentView == .home
+            ? NotchWidget.homeWidth(homeWidgets) + openNotchHorizontalInset
+            : openNotchSize.width
+    }
 
     // Shared interactive spring for movement/resizing to avoid conflicting animations
     private let animationSpring = Animation.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0)
@@ -124,7 +132,11 @@ struct ContentView: View {
                     )
                 
                 mainLayout
-                    .frame(height: vm.notchState == .open ? vm.notchSize.height : nil)
+                    .frame(
+                        width: vm.notchState == .open ? openNotchWidth : nil,
+                        height: vm.notchState == .open ? vm.notchSize.height : nil
+                    )
+                    .animation(animationSpring, value: openNotchWidth)
                     .conditionalModifier(true) { view in
                         let openAnimation = Animation.spring(response: 0.42, dampingFraction: 0.8, blendDuration: 0)
                         let closeAnimation = Animation.spring(response: 0.45, dampingFraction: 1.0, blendDuration: 0)
@@ -355,13 +367,20 @@ struct ContentView: View {
                         NotchHomeView(albumArtNamespace: albumArtNamespace)
                     case .shelf:
                         ShelfView()
+                            .frame(maxWidth: openNotchSize.width - openNotchHorizontalInset)
                     case .mixer:
-                        if #available(macOS 14.2, *) {
-                            AppMixerView()
-                        } else {
-                            Text("Per-app volume requires macOS 14.2 or later")
-                                .foregroundStyle(.secondary)
+                        Group {
+                            if #available(macOS 14.2, *) {
+                                AppMixerView()
+                            } else {
+                                Text("Per-app volume requires macOS 14.2 or later")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
+                        .frame(maxWidth: openNotchSize.width - openNotchHorizontalInset)
+                    case .remote:
+                        MacRemoteView()
+                            .frame(maxWidth: openNotchSize.width - openNotchHorizontalInset)
                     }
                 }
                 .transition(

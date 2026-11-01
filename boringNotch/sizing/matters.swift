@@ -14,7 +14,11 @@ let batterySneakSize: CGSize = .init(width: 160, height: 1)
 
 let shadowPadding: CGFloat = 20
 let openNotchSize: CGSize = .init(width: 640, height: 190)
-let windowSize: CGSize = .init(width: openNotchSize.width, height: openNotchSize.height + shadowPadding)
+/// Home width follows the widgets (see `NotchWidget.homeWidth`); the window is sized for the widest layout.
+let maxOpenNotchWidth: CGFloat = 800
+/// Horizontal padding ContentView adds around the open notch content.
+let openNotchHorizontalInset: CGFloat = (cornerRadiusInsets.opened.top + 12) * 2
+let windowSize: CGSize = .init(width: maxOpenNotchWidth, height: openNotchSize.height + shadowPadding)
 let cornerRadiusInsets: (opened: (top: CGFloat, bottom: CGFloat), closed: (top: CGFloat, bottom: CGFloat)) = (opened: (top: 19, bottom: 24), closed: (top: 6, bottom: 14))
 
 enum MusicPlayerImageSizes {

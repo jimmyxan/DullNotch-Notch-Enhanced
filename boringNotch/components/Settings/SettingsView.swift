@@ -33,6 +33,9 @@ struct SettingsView: View {
                 NavigationLink(value: "Appearance") {
                     Label("Appearance", systemImage: "eye")
                 }
+                NavigationLink(value: "Widgets") {
+                    Label("Widgets", systemImage: "square.grid.2x2")
+                }
                 NavigationLink(value: "Media") {
                     Label("Media", systemImage: "play.laptopcomputer")
                 }
@@ -75,6 +78,8 @@ struct SettingsView: View {
                     GeneralSettings()
                 case "Appearance":
                     Appearance()
+                case "Widgets":
+                    WidgetsSettings()
                 case "Media":
                     Media()
                 case "Calendar":
@@ -759,16 +764,12 @@ struct Media: View {
 
 struct CalendarSettings: View {
     @ObservedObject private var calendarManager = CalendarManager.shared
-    @Default(.showCalendar) var showCalendar: Bool
     @Default(.hideCompletedReminders) var hideCompletedReminders
     @Default(.hideAllDayEvents) var hideAllDayEvents
     @Default(.autoScrollToNextEvent) var autoScrollToNextEvent
 
     var body: some View {
         Form {
-            Defaults.Toggle(key: .showCalendar) {
-                Text("Show calendar")
-            }
             Defaults.Toggle(key: .hideCompletedReminders) {
                 Text("Hide completed reminders")
             }
@@ -812,7 +813,6 @@ struct CalendarSettings: View {
                                 Text(calendar.title)
                             }
                             .accentColor(lighterColor(from: calendar.color))
-                            .disabled(!showCalendar)
                         }
                     }
                 }
@@ -848,7 +848,6 @@ struct CalendarSettings: View {
                                 Text(calendar.title)
                             }
                             .accentColor(lighterColor(from: calendar.color))
-                            .disabled(!showCalendar)
                         }
                     }
                 }
@@ -1445,10 +1444,6 @@ struct Appearance: View {
             }
 
             Section {
-                Defaults.Toggle(key: .showMirror) {
-                    Text("Enable boring mirror")
-                }
-                    .disabled(!checkVideoInput())
                 Picker("Mirror shape", selection: $mirrorShape) {
                     Text("Circle")
                         .tag(MirrorShapeEnum.circle)
@@ -1466,14 +1461,6 @@ struct Appearance: View {
         }
         .accentColor(.effectiveAccent)
         .navigationTitle("Appearance")
-    }
-
-    func checkVideoInput() -> Bool {
-        if AVCaptureDevice.default(for: .video) != nil {
-            return true
-        }
-
-        return false
     }
 }
 

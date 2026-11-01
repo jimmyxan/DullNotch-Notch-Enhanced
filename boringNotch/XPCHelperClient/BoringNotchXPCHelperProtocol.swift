@@ -20,5 +20,11 @@ import Foundation
     func isScreenBrightnessAvailable(with reply: @escaping (Bool) -> Void)
     func currentScreenBrightness(with reply: @escaping (NSNumber?) -> Void)
     func setScreenBrightness(_ value: Float, with reply: @escaping (Bool) -> Void)
+    // MacRemote (embedded helper app): its pairing token lives in its own preferences, out of the sandbox's reach
+    func macRemoteToken(with reply: @escaping (String?) -> Void)
+    func setMacRemoteToken(_ token: String, with reply: @escaping (Bool) -> Void)
+    func stopMacRemote(with reply: @escaping (Bool) -> Void)
+    /// Launch arguments are dropped when a sandboxed app opens another app, so the helper launches it.
+    func launchMacRemote(at path: String, with reply: @escaping (String?) -> Void)
 }
 

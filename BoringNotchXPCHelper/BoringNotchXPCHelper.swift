@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 import ApplicationServices
 import IOKit
 import CoreGraphics
@@ -187,5 +188,36 @@ class BoringNotchXPCHelper: NSObject, BoringNotchXPCHelperProtocol {
             }
             return nil
         }()
+    }
+
+    // MARK: - MacRemote
+
+    private static let macRemoteDomain = "local.macremote" as CFString
+
+    @objc func macRemoteToken(with reply: @escaping (String?) -> Void) {
+        CFPreferencesAppSynchronize(Self.macRemoteDomain)
+        reply(CFPreferencesCopyAppValue("token" as CFString, Self.macRemoteDomain) as? String)
+    }
+
+    /// Only used while MacRemote is stopped: it reads the token at launch.
+    @objc func setMacRemoteToken(_ token: String, with reply: @escaping (Bool) -> Void) {
+        CFPreferencesSetAppValue("token" as CFString, token as CFString, Self.macRemoteDomain)
+        reply(CFPreferencesAppSynchronize(Self.macRemoteDomain))
+    }
+
+    /// Replies nil on success, or the error message.
+    @objc func launchMacRemote(at path: String, with reply: @escaping (String?) -> Void) {
+        let config = NSWorkspace.OpenConfiguration()
+        config.arguments = ["--headless"]
+        config.activates = false
+        NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path), configuration: config) { _, error in
+            reply(error?.localizedDescription)
+        }
+    }
+
+    @objc func stopMacRemote(with reply: @escaping (Bool) -> Void) {
+        let apps = NSRunningApplication.runningApplications(withBundleIdentifier: "local.macremote")
+        apps.forEach { $0.terminate() }
+        reply(!apps.isEmpty)
     }
 }

@@ -1,0 +1,3 @@
+[submodule "MacRemote"]
+	path = MacRemote
+	url = https://github.com/jimmyxan/MacRemote.git

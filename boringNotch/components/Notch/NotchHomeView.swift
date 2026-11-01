@@ -281,8 +281,8 @@ struct MusicControlsView: View {
         )
         let padded = slotConfig.padded(to: sanitizedLimit, filler: .none)
         let result = Array(padded.prefix(sanitizedLimit))
-        // If calendar and camera are both visible alongside music, hide the edge slots
-        let shouldHideEdges = Defaults[.showCalendar] && Defaults[.showMirror] && webcamManager.cameraAvailable && vm.isCameraExpanded
+        // Two small widgets next to music leave less room: hide the edge slots
+        let shouldHideEdges = Defaults[.homeWidgets].count >= 3
         if shouldHideEdges && result.count >= 5 {
             return Array(result.dropFirst().dropLast())
         }
@@ -474,48 +474,90 @@ struct VolumeControlView: View {
 struct NotchHomeView: View {
     @EnvironmentObject var vm: BoringViewModel
     @ObservedObject var webcamManager = WebcamManager.shared
-    @ObservedObject var batteryModel = BatteryStatusViewModel.shared
     @ObservedObject var coordinator = BoringViewCoordinator.shared
+    @Default(.homeWidgets) private var widgets
+    @Default(.weatherReplacesIdleBluetooth) private var weatherFallback
+    @ObservedObject private var bluetooth = BluetoothBatteryManager.shared
+    @State private var batteryExpanded = false
+    @Namespace private var batteryNamespace
     let albumArtNamespace: Namespace.ID
+
+    private let expandAnimation = Animation.spring(response: 0.45, dampingFraction: 0.82)
 
     var body: some View {
         Group {
             if !coordinator.firstLaunch {
-                mainContent
+                if batteryExpanded {
+                    AirPodsDetailView(namespace: batteryNamespace) {
+                        withAnimation(expandAnimation) { batteryExpanded = false }
+                    }
+                    .frame(width: NotchWidget.homeWidth(shown))
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                } else {
+                    mainContent
+                }
             }
         }
         // simplified: use a straightforward opacity transition
         .transition(.opacity)
+        .onChange(of: vm.notchState) { _, state in
+            if state == .closed { batteryExpanded = false }
+        }
+        // keep polling Bluetooth even while its widget is swapped for the weather
+        .onAppear { if widgets.contains(.bluetoothBattery) { bluetooth.start() } }
+        .onDisappear { if widgets.contains(.bluetoothBattery) { bluetooth.stop() } }
     }
 
-    private var shouldShowCamera: Bool {
-        Defaults[.showMirror] && webcamManager.cameraAvailable && vm.isCameraExpanded
+    /// The configured widgets, with the Bluetooth battery swapped for the weather while nothing is connected.
+    private var shown: [NotchWidget] {
+        guard weatherFallback, bluetooth.didRead, bluetooth.device == nil, !widgets.contains(.weather),
+              let i = widgets.firstIndex(of: .bluetoothBattery) else { return widgets }
+        var list = widgets
+        list[i] = .weather
+        return list
     }
 
     private var mainContent: some View {
-        HStack(alignment: .top, spacing: (shouldShowCamera && Defaults[.showCalendar]) ? 10 : 15) {
-            MusicPlayerView(albumArtNamespace: albumArtNamespace)
-
-            if Defaults[.showCalendar] {
-                CalendarView()
-                    .frame(width: shouldShowCamera ? 170 : 215)
-                    .onHover { isHovering in
-                        vm.isHoveringCalendar = isHovering
-                    }
-                    .environmentObject(vm)
-                    .transition(.opacity)
-            }
-
-            if shouldShowCamera {
-                CameraPreviewView(webcamManager: webcamManager)
-                    .scaledToFit()
-                    .opacity(vm.notchState == .closed ? 0 : 1)
-                    .blur(radius: vm.notchState == .closed ? 20 : 0)
-                    .animation(.interactiveSpring(response: 0.32, dampingFraction: 0.76, blendDuration: 0), value: shouldShowCamera)
+        HStack(alignment: .top, spacing: NotchWidget.spacing) {
+            ForEach(shown) { widget in
+                widgetView(widget)
+                    .frame(width: widget.width)
+                    .transition(.scale(scale: 0.85).combined(with: .opacity))
             }
         }
+        .frame(width: NotchWidget.homeWidth(shown))
+        .animation(expandAnimation, value: shown)
         .transition(.asymmetric(insertion: .opacity.combined(with: .move(edge: .top)), removal: .opacity))
         .blur(radius: vm.notchState == .closed ? 30 : 0)
+    }
+
+    @ViewBuilder
+    private func widgetView(_ widget: NotchWidget) -> some View {
+        switch widget {
+        case .music:
+            MusicPlayerView(albumArtNamespace: albumArtNamespace)
+        case .calendar:
+            CalendarView()
+                .onHover { vm.isHoveringCalendar = $0 }
+                .environmentObject(vm)
+        case .mirror:
+            if !webcamManager.cameraAvailable {
+                Image(systemName: "web.camera")
+                    .font(.system(size: 28))
+                    .foregroundStyle(.gray)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(RoundedRectangle(cornerRadius: 12).fill(Color(white: 0.08)))
+            } else {
+                CameraPreviewView(webcamManager: webcamManager)
+                    .scaledToFit()
+            }
+        case .weather:
+            WeatherWidget()
+        case .bluetoothBattery:
+            BluetoothBatteryWidget(namespace: batteryNamespace) {
+                withAnimation(expandAnimation) { batteryExpanded = true }
+            }
+        }
     }
 }
 
