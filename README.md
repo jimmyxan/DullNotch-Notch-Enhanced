@@ -84,13 +84,14 @@ When a new version is published on GitHub, DullNotch tells you: **Update Now** o
 | **Mixer** | A new notch tab with one vertical fader per app playing sound (0–150%), native and driver-free. See below. |
 | **Spotify everywhere** | Shows what you are playing on your phone, speakers or TV, even with the Spotify app closed on the Mac. Works with **Spotify Free**, through Last.fm. |
 | **Quiet idle state** | When nothing plays on any device, a calm Spotify card replaces the placeholder track. |
-| **Home widgets** | Build the home like an iPhone widget stack: Music, Calendar, Bluetooth battery, Weather, Mirror, System monitor and AI usage. Up to 1 large + 2 small; the notch resizes to fit. |
+| **Home widgets** | Build the home like an iPhone widget stack: Music, Calendar, Bluetooth battery, Weather, Mirror, System monitor, AI usage and Quote. Up to 1 large + 2 small; the notch resizes to fit. |
 | **Bluetooth battery** | AirPods and Beats show left, right and case; other headphones and speakers show one percentage. |
 | **Weather** | Apple-style card with the sky and motion of the current condition. Can stand in for the battery widget while nothing is connected. |
 | **MacRemote** | A new notch tab that starts **[MacRemote](https://github.com/jimmyxan/MacRemote)** and shows the QR code to pair your iPhone. Bundled with the app. |
 | **System monitor** | CPU, memory, GPU, CPU and GPU temperature: pick one or two, each with a live graph of the last 2 minutes. |
 | **AI usage** | Your Claude or Codex plan limits at a glance: 5-hour and weekly windows as concentric rings. |
 | **Update notice** | A new GitHub release is announced in the app: update now or get a reminder tomorrow. |
+| **Quote** | A quiet, editorial quote in a small or large widget, changing every 6 hours. |
 
 ### Home widgets
 
@@ -112,6 +113,12 @@ The home of the open notch is a set of widgets you choose and arrange in **Setti
 
 - **System monitor**: choose up to two of CPU, Memory, GPU, CPU temp and GPU temp (Settings › Widgets). Each shows its current value and a graph of the last 2 minutes, so spikes stand out; hover to see the 2-minute peak. It samples every 3 seconds only while the widget is in the notch, costing microseconds for CPU and memory. Temperatures are the average of the CPU and GPU die sensors (Apple silicon).
 - **AI usage**: what's left of your **Claude** (Pro / Max) or **Codex** (ChatGPT, free plan included) limits. The outer ring is the 5-hour window, the inner one the week; hover to see when each resets. No API key: it reuses the sign-in of Claude Code (`claude`) or Codex (`codex login`), and Settings › Widgets walks you through it step by step. The sign-in never leaves your Mac except to read your limits from Anthropic or OpenAI.
+
+<p align="center">
+  <img src="docs/widget-quote.png" alt="Quote widget, large: a line by Seneca in a serif font with a champagne author line" width="460">
+</p>
+
+- **Quote**: a hand-picked line in a serif face, with the author in small caps (hover to see the book, letter or poem it comes from). Two sizes: **Quote** (small) uses short lines, **Quote (large)** takes the place of a large widget and uses longer ones. 86 quotes from Seneca, Marcus Aurelius, Rilke, Mary Oliver, Annie Dillard, Baldwin, Camus, Kafka, Le Guin, Musashi and others, each traced to a written source: no unsourced internet quotes. A new one every 6 hours, each shown once before the cycle starts over; it is worked out from the time, so it costs nothing in the background.
 
 ### MacRemote
 
@@ -227,13 +234,14 @@ Quando su GitHub esce una nuova versione, DullNotch te lo dice: **Update Now** a
 | **Mixer** | Una nuova tab del notch con uno slider verticale per ogni app che emette suono (0–150%), nativo e senza driver. Vedi sotto. |
 | **Spotify ovunque** | Mostra cosa ascolti su telefono, casse o TV, anche con l'app Spotify chiusa sul Mac. Funziona con **Spotify Free**, tramite Last.fm. |
 | **Stato di attesa discreto** | Quando non suona nulla su nessun dispositivo, una scheda Spotify sobria sostituisce il brano segnaposto. |
-| **Widget nella home** | Componi la home come i widget di iPhone: Musica, Calendario, Batteria Bluetooth, Meteo, Specchio, Monitor di sistema e Utilizzo AI. Fino a 1 grande + 2 piccoli; il notch si adatta. |
+| **Widget nella home** | Componi la home come i widget di iPhone: Musica, Calendario, Batteria Bluetooth, Meteo, Specchio, Monitor di sistema, Utilizzo AI e Citazione. Fino a 1 grande + 2 piccoli; il notch si adatta. |
 | **Batteria Bluetooth** | AirPods e Beats mostrano sinistra, destra e custodia; altre cuffie e casse una sola percentuale. |
 | **Meteo** | Scheda in stile Apple con il cielo e il movimento della condizione attuale. Può prendere il posto della batteria quando non c'è nulla collegato. |
 | **MacRemote** | Una nuova tab del notch che avvia **[MacRemote](https://github.com/jimmyxan/MacRemote)** e mostra il QR per associare l'iPhone. Inclusa nell'app. |
 | **Monitor di sistema** | CPU, memoria, GPU, temperatura di CPU e GPU: scegline uno o due, ciascuno con un grafico dal vivo degli ultimi 2 minuti. |
 | **Utilizzo AI** | I limiti del tuo piano Claude o Codex a colpo d'occhio: finestra di 5 ore e settimanale come anelli concentrici. |
 | **Avviso aggiornamenti** | Una nuova release su GitHub viene segnalata nell'app: aggiorna subito o ricevi un promemoria il giorno dopo. |
+| **Citazione** | Una citazione sobria ed elegante in un widget piccolo o grande, che cambia ogni 6 ore. |
 
 ### Widget nella home
 
@@ -253,6 +261,12 @@ La home del notch aperto è un insieme di widget che scegli e disponi in **Impos
 
 - **Monitor di sistema**: scegli fino a due parametri tra CPU, Memoria, GPU, temperatura CPU e temperatura GPU (Impostazioni › Widgets). Ognuno mostra il valore attuale e un grafico degli ultimi 2 minuti, così i picchi si vedono subito; passa il mouse per vedere il picco dei 2 minuti. Campiona ogni 3 secondi solo finché il widget è nel notch, con un costo di microsecondi per CPU e memoria. Le temperature sono la media dei sensori del die di CPU e GPU (Apple silicon).
 - **Utilizzo AI**: quanto ti resta dei limiti di **Claude** (Pro / Max) o **Codex** (ChatGPT, anche piano gratuito). L'anello esterno è la finestra di 5 ore, quello interno la settimana; passa il mouse per vedere quando si azzerano. Nessuna chiave API: usa l'accesso di Claude Code (`claude`) o di Codex (`codex login`), e Impostazioni › Widgets ti guida passo per passo. L'accesso non lascia mai il Mac, se non per leggere i limiti da Anthropic o OpenAI.
+
+<p align="center">
+  <img src="docs/widget-quote.png" alt="Widget Citazione grande: una frase di Seneca in carattere serif con l'autore in champagne" width="460">
+</p>
+
+- **Citazione** (in inglese): una frase scelta a mano in carattere serif, con l'autore in maiuscoletto (passa il mouse per vedere il libro, la lettera o la poesia da cui viene). Due misure: **Quote** (piccolo) usa frasi brevi, **Quote (large)** prende il posto di un widget grande e usa quelle più lunghe. 86 citazioni da Seneca, Marco Aurelio, Rilke, Mary Oliver, Annie Dillard, Baldwin, Camus, Kafka, Le Guin, Musashi e altri, ognuna con una fonte scritta: niente frasi da internet senza origine. Ne arriva una nuova ogni 6 ore, ciascuna una sola volta prima che il giro ricominci; viene calcolata dall'ora, quindi non consuma nulla in background.
 
 ### MacRemote
 

@@ -13,12 +13,12 @@ import SwiftUI
 // MARK: - Model
 
 enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
-    case music, bluetoothBattery, calendar, mirror, weather, aiUsage, systemMonitor
+    case music, bluetoothBattery, calendar, mirror, weather, aiUsage, systemMonitor, quote, quoteLarge
 
     var id: String { rawValue }
 
     /// Width units: large = 2, small = 1. The home fits 1 large + 2 small.
-    var units: Int { self == .music ? 2 : 1 }
+    var units: Int { self == .music || self == .quoteLarge ? 2 : 1 }
     static let maxUnits = 4
 
     static func fits(_ list: [NotchWidget]) -> Bool {
@@ -28,9 +28,9 @@ enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
     /// Fixed widget widths: the open notch grows/shrinks with the widgets it holds.
     var width: CGFloat {
         switch self {
-        case .music: return 330
+        case .music, .quoteLarge: return 330
         case .calendar: return 210
-        case .bluetoothBattery, .mirror, .weather, .aiUsage, .systemMonitor: return 150
+        case .bluetoothBattery, .mirror, .weather, .aiUsage, .systemMonitor, .quote: return 150
         }
     }
 
@@ -52,6 +52,8 @@ enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
         case .weather: return "Weather"
         case .aiUsage: return "AI usage"
         case .systemMonitor: return "System monitor"
+        case .quote: return "Quote"
+        case .quoteLarge: return "Quote (large)"
         }
     }
 
@@ -64,6 +66,7 @@ enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
         case .weather: return "cloud.sun.fill"
         case .aiUsage: return "gauge.with.dots.needle.67percent"
         case .systemMonitor: return "waveform.path.ecg"
+        case .quote, .quoteLarge: return "quote.opening"
         }
     }
 }
@@ -486,6 +489,8 @@ private struct GenericWidgetTile: View {
             case .weather: weather
             case .aiUsage: aiUsage
             case .systemMonitor: systemMonitor
+            case .quote: QuoteContent(quote: QuoteLibrary.all[0], large: false)
+            case .quoteLarge: QuoteContent(quote: QuoteLibrary.all[33], large: true)
             }
         }
         .frame(width: widget.width, height: Self.height)

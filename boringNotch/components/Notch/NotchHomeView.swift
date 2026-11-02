@@ -557,6 +557,10 @@ struct NotchHomeView: View {
             AIUsageWidget()
         case .systemMonitor:
             SystemMonitorWidget()
+        case .quote:
+            QuoteWidget(large: false)
+        case .quoteLarge:
+            QuoteWidget(large: true)
         case .bluetoothBattery:
             BluetoothBatteryWidget(namespace: batteryNamespace) {
                 withAnimation(expandAnimation) { batteryExpanded = true }
