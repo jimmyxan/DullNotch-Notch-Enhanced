@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="docs/icon.png" alt="TheBoringNotch : Liquid Glass icon" width="128" height="128">
+<img src="docs/icon.png" alt="DullNotch-Notch Enhanced icon" width="128" height="128">
 
-# TheBoringNotch : Liquid Glass
+# DullNotch-Notch Enhanced
 
 **A Liquid Glass remake of [Boring Notch](https://github.com/TheBoredTeam/boring.notch) for macOS 26 and later.**<br>
 **Un remake in stile Liquid Glass di [Boring Notch](https://github.com/TheBoredTeam/boring.notch) per macOS 26 e successivi.**
@@ -48,7 +48,7 @@
 
 ## English
 
-TheBoringNotch : Liquid Glass is a personal remake of **[Boring Notch](https://github.com/TheBoredTeam/boring.notch)** by TheBoredTeam. It keeps everything that makes the original great (music, calendar, shelf, HUDs, smooth Apple-style animations) and redesigns the look for the Liquid Glass era, plus a few new features.
+DullNotch-Notch Enhanced is a personal remake of **[Boring Notch](https://github.com/TheBoredTeam/boring.notch)** by TheBoredTeam. It keeps everything that makes the original great (music, calendar, shelf, HUDs, smooth Apple-style animations) and redesigns the look for the Liquid Glass era, plus a few new features.
 
 > This is not a fork and is not affiliated with TheBoredTeam. All credit for the original app goes to them. The project stays under the same **GPL-3.0** license.
 
@@ -56,7 +56,7 @@ TheBoringNotch : Liquid Glass is a personal remake of **[Boring Notch](https://g
 
 Download the latest release, no Xcode needed:
 
-1. Open the **[latest release](https://github.com/jimmyxan/TheBoringNotch-LiquidGlass/releases/latest)** and download `TheBoringNotch-x.y.z.zip` under *Assets*.
+1. Open the **[latest release](https://github.com/jimmyxan/DullNotch-Notch-Enhanced/releases/latest)** and download `TheBoringNotch-x.y.z.zip` under *Assets*.
 2. Unzip it and drag **TheBoringNotch.app** into your **Applications** folder.
 3. If the original Boring Notch is installed, quit it and move it to the Trash: both apps share the same bundle identifier.
 4. Open the app. It is not notarized by Apple, so the first launch is blocked: go to **System Settings › Privacy & Security**, scroll down and click **Open Anyway** next to TheBoringNotch, then confirm.
@@ -156,8 +156,8 @@ Good to know:
 ### Build from source
 
 ```bash
-git clone --recursive https://github.com/jimmyxan/TheBoringNotch-LiquidGlass.git
-cd TheBoringNotch-LiquidGlass
+git clone --recursive https://github.com/jimmyxan/DullNotch-Notch-Enhanced.git
+cd DullNotch-Notch-Enhanced
 open boringNotch.xcodeproj
 ```
 
@@ -179,7 +179,7 @@ Select the `boringNotch` scheme and press **Run**. Accessibility permission is r
 
 ## Italiano
 
-TheBoringNotch : Liquid Glass è un remake personale di **[Boring Notch](https://github.com/TheBoredTeam/boring.notch)** di TheBoredTeam. Mantiene tutto ciò che rende ottimo l'originale (musica, calendario, shelf, HUD, animazioni fluide in stile Apple) e ridisegna l'aspetto per l'era Liquid Glass, con qualche funzione nuova.
+DullNotch-Notch Enhanced è un remake personale di **[Boring Notch](https://github.com/TheBoredTeam/boring.notch)** di TheBoredTeam. Mantiene tutto ciò che rende ottimo l'originale (musica, calendario, shelf, HUD, animazioni fluide in stile Apple) e ridisegna l'aspetto per l'era Liquid Glass, con qualche funzione nuova.
 
 > Non è un fork e non è affiliato a TheBoredTeam. Tutto il merito dell'app originale va a loro. Il progetto resta sotto la stessa licenza **GPL-3.0**.
 
@@ -187,7 +187,7 @@ TheBoringNotch : Liquid Glass è un remake personale di **[Boring Notch](https:/
 
 Scarica l'ultima release, senza bisogno di Xcode:
 
-1. Apri l'**[ultima release](https://github.com/jimmyxan/TheBoringNotch-LiquidGlass/releases/latest)** e scarica `TheBoringNotch-x.y.z.zip` sotto *Assets*.
+1. Apri l'**[ultima release](https://github.com/jimmyxan/DullNotch-Notch-Enhanced/releases/latest)** e scarica `TheBoringNotch-x.y.z.zip` sotto *Assets*.
 2. Estrai lo zip e trascina **TheBoringNotch.app** nella cartella **Applicazioni**.
 3. Se hai installato il Boring Notch originale, chiudilo e spostalo nel Cestino: le due app usano lo stesso identificativo.
 4. Apri l'app. Non è notarizzata da Apple, quindi il primo avvio viene bloccato: vai in **Impostazioni di Sistema › Privacy e sicurezza**, scorri in basso e premi **Apri comunque** accanto a TheBoringNotch, poi conferma.
@@ -285,8 +285,8 @@ Da sapere:
 ### Compilazione dal codice
 
 ```bash
-git clone --recursive https://github.com/jimmyxan/TheBoringNotch-LiquidGlass.git
-cd TheBoringNotch-LiquidGlass
+git clone --recursive https://github.com/jimmyxan/DullNotch-Notch-Enhanced.git
+cd DullNotch-Notch-Enhanced
 open boringNotch.xcodeproj
 ```
 
