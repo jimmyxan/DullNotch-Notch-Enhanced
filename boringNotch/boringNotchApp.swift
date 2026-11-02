@@ -28,8 +28,15 @@ struct DynamicNotchApp: App {
         SettingsWindowController.shared.setUpdaterController(updaterController)
     }
 
+    /// macOS 27+ owns visibility via System Settings → Menu Bar. A two-way binding lets SwiftUI
+    /// write the system's hide/show back into `menubarIcon`, which then fights the switch.
+    private var menuBarIconInserted: Binding<Bool> {
+        if #available(macOS 27, *) { return .constant(true) }
+        return $showMenuBarIcon
+    }
+
     var body: some Scene {
-        MenuBarExtra("boring.notch", systemImage: "sparkle", isInserted: $showMenuBarIcon) {
+        MenuBarExtra("boring.notch", systemImage: "sparkle", isInserted: menuBarIconInserted) {
             Button("Settings") {
                 DispatchQueue.main.async {
                     SettingsWindowController.shared.showWindow()
