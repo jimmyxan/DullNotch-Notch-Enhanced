@@ -5,7 +5,7 @@
 # DullNotch-Notch Enhanced
 
 **A Liquid Glass remake of [Boring Notch](https://github.com/TheBoredTeam/boring.notch) for macOS 26 and later.**<br>
-**Un remake in stile Liquid Glass di [Boring Notch](https://github.com/TheBoredTeam/boring.notch) per macOS 26 e successivi.**
+
 
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-black.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/macOS-14%2B%20·%20Liquid%20Glass%2026%2B-black.svg)](#requirements)
