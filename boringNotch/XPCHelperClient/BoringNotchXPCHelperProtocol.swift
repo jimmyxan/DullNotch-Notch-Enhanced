@@ -26,5 +26,11 @@ import Foundation
     func stopMacRemote(with reply: @escaping (Bool) -> Void)
     /// Launch arguments are dropped when a sandboxed app opens another app, so the helper launches it.
     func launchMacRemote(at path: String, with reply: @escaping (String?) -> Void)
+    /// AI plan usage ("claude" / "codex"). The helper reads the CLI's sign-in outside the sandbox and
+    /// replies the HTTP status (0 = not signed in, -1 = network error) and the raw JSON body. Tokens never leave it.
+    func aiUsage(_ provider: String, with reply: @escaping (Int, String?) -> Void)
+    /// System monitor sensors that need IOKit outside the sandbox: GPU utilization %, average CPU and GPU
+    /// die temperature in °C. -1 = not available on this Mac.
+    func systemSensors(with reply: @escaping (Double, Double, Double) -> Void)
 }
 

@@ -289,6 +289,32 @@ extension XPCHelperClient {
             return false
         }
     }
+
+    /// GPU %, CPU °C, GPU °C; nil for anything the Mac doesn't report.
+    nonisolated func systemSensors() async -> (gpu: Double?, cpuTemp: Double?, gpuTemp: Double?) {
+        func valid(_ v: Double) -> Double? { v < 0 ? nil : v }
+        do {
+            let service = await MainActor.run { ensureRemoteService() }
+            let (g, c, t): (Double, Double, Double) = try await service.withContinuation { service, continuation in
+                service.systemSensors { continuation.resume(returning: ($0, $1, $2)) }
+            }
+            return (valid(g), valid(c), valid(t))
+        } catch {
+            return (nil, nil, nil)
+        }
+    }
+
+    /// (HTTP status, body): 0 = not signed in, -1 = network/helper error.
+    nonisolated func aiUsage(_ provider: String) async -> (Int, String?) {
+        do {
+            let service = await MainActor.run { ensureRemoteService() }
+            return try await service.withContinuation { service, continuation in
+                service.aiUsage(provider) { continuation.resume(returning: ($0, $1)) }
+            }
+        } catch {
+            return (-1, nil)
+        }
+    }
 }
 
 extension Notification.Name {

@@ -553,6 +553,10 @@ struct NotchHomeView: View {
             }
         case .weather:
             WeatherWidget()
+        case .aiUsage:
+            AIUsageWidget()
+        case .systemMonitor:
+            SystemMonitorWidget()
         case .bluetoothBattery:
             BluetoothBatteryWidget(namespace: batteryNamespace) {
                 withAnimation(expandAnimation) { batteryExpanded = true }

@@ -56,11 +56,11 @@ DullNotch-Notch Enhanced is a personal remake of **[Boring Notch](https://github
 
 Download the latest release, no Xcode needed:
 
-1. Open the **[latest release](https://github.com/jimmyxan/DullNotch-Notch-Enhanced/releases/latest)** and download `TheBoringNotch-x.y.z.zip` under *Assets*.
-2. Unzip it and drag **TheBoringNotch.app** into your **Applications** folder.
+1. Open the **[latest release](https://github.com/jimmyxan/DullNotch-Notch-Enhanced/releases/latest)** and download `DullNotch-x.y.z.zip` under *Assets*.
+2. Unzip it and drag **DullNotch.app** into your **Applications** folder.
 3. If the original Boring Notch is installed, quit it and move it to the Trash: both apps share the same bundle identifier.
-4. Open the app. It is not notarized by Apple, so the first launch is blocked: go to **System Settings › Privacy & Security**, scroll down and click **Open Anyway** next to TheBoringNotch, then confirm.
-   Prefer the Terminal? Run `xattr -dr com.apple.quarantine /Applications/TheBoringNotch.app` and open the app normally.
+4. Open the app. It is not notarized by Apple, so the first launch is blocked: go to **System Settings › Privacy & Security**, scroll down and click **Open Anyway** next to DullNotch, then confirm.
+   Prefer the Terminal? Run `xattr -dr com.apple.quarantine /Applications/DullNotch.app` and open the app normally.
 5. The app lives in the notch and in the **menu bar** (no Dock icon). Use the menu bar item to open **Settings** or **Quit**.
 6. Grant permissions when you need them:
    - **Accessibility**, to replace the system volume and brightness HUD (Settings › HUDs).
@@ -70,7 +70,7 @@ Download the latest release, no Xcode needed:
    - **Location**, for the weather widget. Without it the weather uses an approximate position from your IP address.
    - **Accessibility for MacRemote**, the first time you start it from the notch (it is a separate helper app).
 
-To update, download the newest release and replace the app in Applications. Afterwards, remove and re-add the app under *Accessibility*: macOS ties the permission to the exact build.
+When a new version is published on GitHub, DullNotch tells you: **Update Now** opens the release page, **Remind Me Tomorrow** asks again the next day (Settings › About can turn this off, and *Check for Updates…* checks right away). To update, download the newest release and replace the app in Applications. Afterwards, remove and re-add the app under *Accessibility*: macOS ties the permission to the exact build.
 
 ### What's new
 
@@ -84,10 +84,13 @@ To update, download the newest release and replace the app in Applications. Afte
 | **Mixer** | A new notch tab with one vertical fader per app playing sound (0–150%), native and driver-free. See below. |
 | **Spotify everywhere** | Shows what you are playing on your phone, speakers or TV, even with the Spotify app closed on the Mac. Works with **Spotify Free**, through Last.fm. |
 | **Quiet idle state** | When nothing plays on any device, a calm Spotify card replaces the placeholder track. |
-| **Home widgets** | Build the home like an iPhone widget stack: Music, Calendar, Bluetooth battery, Weather and Mirror. Up to 1 large + 2 small; the notch resizes to fit. |
+| **Home widgets** | Build the home like an iPhone widget stack: Music, Calendar, Bluetooth battery, Weather, Mirror, System monitor and AI usage. Up to 1 large + 2 small; the notch resizes to fit. |
 | **Bluetooth battery** | AirPods and Beats show left, right and case; other headphones and speakers show one percentage. |
 | **Weather** | Apple-style card with the sky and motion of the current condition. Can stand in for the battery widget while nothing is connected. |
 | **MacRemote** | A new notch tab that starts **[MacRemote](https://github.com/jimmyxan/MacRemote)** and shows the QR code to pair your iPhone. Bundled with the app. |
+| **System monitor** | CPU, memory, GPU, CPU and GPU temperature: pick one or two, each with a live graph of the last 2 minutes. |
+| **AI usage** | Your Claude or Codex plan limits at a glance: 5-hour and weekly windows as concentric rings. |
+| **Update notice** | A new GitHub release is announced in the app: update now or get a reminder tomorrow. |
 
 ### Home widgets
 
@@ -101,11 +104,20 @@ The home of the open notch is a set of widgets you choose and arrange in **Setti
 - **Weather**: data from [Open-Meteo](https://open-meteo.com) (free, no API key). Rain, snow, thunderstorms, clouds and fog are animated, gently. Location comes from Location Services, or from your IP address if you don't allow it; you can grant it again or refresh from Settings. With no internet connection the widget shows the Claude Code mascot crying under a rain cloud (above).
 - **Weather when nothing is connected** (on by default): while no Bluetooth device is connected, the battery widget is replaced by the weather, and it comes back as soon as a device connects.
 
+<p align="center">
+  <img src="docs/widget-system-monitor.png" alt="System monitor widget: memory and CPU with 2-minute graphs" width="300">
+  &nbsp;&nbsp;
+  <img src="docs/widget-ai-usage.png" alt="AI usage widget: Claude 5-hour and weekly limits as concentric rings" width="300">
+</p>
+
+- **System monitor**: choose up to two of CPU, Memory, GPU, CPU temp and GPU temp (Settings › Widgets). Each shows its current value and a graph of the last 2 minutes, so spikes stand out; hover to see the 2-minute peak. It samples every 3 seconds only while the widget is in the notch, costing microseconds for CPU and memory. Temperatures are the average of the CPU and GPU die sensors (Apple silicon).
+- **AI usage**: what's left of your **Claude** (Pro / Max) or **Codex** (ChatGPT, free plan included) limits. The outer ring is the 5-hour window, the inner one the week; hover to see when each resets. No API key: it reuses the sign-in of Claude Code (`claude`) or Codex (`codex login`), and Settings › Widgets walks you through it step by step. The sign-in never leaves your Mac except to read your limits from Anthropic or OpenAI.
+
 ### MacRemote
 
 The **MacRemote** tab, next to the Mixer, integrates **[MacRemote](https://github.com/jimmyxan/MacRemote)** ([macremote.it](https://www.macremote.it)), my app to control the Mac from an iPhone over the local network: volume, media, brightness, keyboard, touchpad and more, from a web page in Safari. Nothing to install on the phone.
 
-- **Included in every install**: MacRemote is built from its own repository (a git submodule) and shipped inside `TheBoringNotch.app`. There is nothing else to download.
+- **Included in every install**: MacRemote is built from its own repository (a git submodule) and shipped inside `DullNotch.app`. There is nothing else to download.
 - **Start → scan → done**: press **Start MacRemote**, scan the QR code with the iPhone camera (same Wi-Fi), and the remote opens.
 - **Copy link**, **New code** (phones paired with the old link stop working) and **Stop** (MacRemote quits completely).
 - If you already run a standalone MacRemote, the tab uses that one instead of starting a second copy.
@@ -138,7 +150,7 @@ Spotify's own Web API now requires Premium. Last.fm does not: Spotify sends your
 
 1. **Create a Last.fm account** at [last.fm/join](https://www.last.fm/join) (skip if you have one).
 2. **Connect Spotify**: open [last.fm/settings/applications](https://www.last.fm/settings/applications) and click **Connect** next to *Spotify Scrobbling*.
-3. **Get a free API key**: go to [last.fm/api/account/create](https://www.last.fm/api/account/create). Enter any application name (for example *TheBoringNotch*) and a short description. Leave *Callback URL* empty. Submit and copy the **API key**. You do not need the *Shared secret*: do not paste it anywhere.
+3. **Get a free API key**: go to [last.fm/api/account/create](https://www.last.fm/api/account/create). Enter any application name (for example *DullNotch*) and a short description. Leave *Callback URL* empty. Submit and copy the **API key**. You do not need the *Shared secret*: do not paste it anywhere.
 4. **Set up the notch**: open the notch settings › **Media**, set **Music Source** to **Spotify**, then fill **Last.fm username** and **Last.fm API key** in *Spotify on other devices*.
 5. **Try it**: close Spotify on the Mac and play something on your phone. Within about 15 seconds the notch shows the track. Your Last.fm profile should say *Scrobbling now*.
 
@@ -187,11 +199,11 @@ DullNotch-Notch Enhanced è un remake personale di **[Boring Notch](https://gith
 
 Scarica l'ultima release, senza bisogno di Xcode:
 
-1. Apri l'**[ultima release](https://github.com/jimmyxan/DullNotch-Notch-Enhanced/releases/latest)** e scarica `TheBoringNotch-x.y.z.zip` sotto *Assets*.
-2. Estrai lo zip e trascina **TheBoringNotch.app** nella cartella **Applicazioni**.
+1. Apri l'**[ultima release](https://github.com/jimmyxan/DullNotch-Notch-Enhanced/releases/latest)** e scarica `DullNotch-x.y.z.zip` sotto *Assets*.
+2. Estrai lo zip e trascina **DullNotch.app** nella cartella **Applicazioni**.
 3. Se hai installato il Boring Notch originale, chiudilo e spostalo nel Cestino: le due app usano lo stesso identificativo.
-4. Apri l'app. Non è notarizzata da Apple, quindi il primo avvio viene bloccato: vai in **Impostazioni di Sistema › Privacy e sicurezza**, scorri in basso e premi **Apri comunque** accanto a TheBoringNotch, poi conferma.
-   Preferisci il Terminale? Esegui `xattr -dr com.apple.quarantine /Applications/TheBoringNotch.app` e apri l'app normalmente.
+4. Apri l'app. Non è notarizzata da Apple, quindi il primo avvio viene bloccato: vai in **Impostazioni di Sistema › Privacy e sicurezza**, scorri in basso e premi **Apri comunque** accanto a DullNotch, poi conferma.
+   Preferisci il Terminale? Esegui `xattr -dr com.apple.quarantine /Applications/DullNotch.app` e apri l'app normalmente.
 5. L'app vive nel notch e nella **barra dei menu** (nessuna icona nel Dock). Dall'icona nella barra dei menu apri le **Impostazioni** o **esci**.
 6. Concedi i permessi quando servono:
    - **Accessibilità**, per sostituire le HUD di volume e luminosità di sistema (Impostazioni › HUDs).
@@ -201,7 +213,7 @@ Scarica l'ultima release, senza bisogno di Xcode:
    - **Posizione**, per il widget meteo. Senza permesso il meteo usa una posizione approssimata dall'indirizzo IP.
    - **Accessibilità per MacRemote**, la prima volta che lo avvii dal notch (è un'app di supporto separata).
 
-Per aggiornare, scarica la release più recente e sostituisci l'app in Applicazioni. Poi rimuovi e riaggiungi l'app in *Accessibilità*: macOS lega il permesso alla build esatta.
+Quando su GitHub esce una nuova versione, DullNotch te lo dice: **Update Now** apre la pagina della release, **Remind Me Tomorrow** te lo ricorda il giorno dopo (puoi disattivarlo in Impostazioni › About, e *Check for Updates…* controlla subito). Per aggiornare, scarica la release più recente e sostituisci l'app in Applicazioni. Poi rimuovi e riaggiungi l'app in *Accessibilità*: macOS lega il permesso alla build esatta.
 
 ### Novità
 
@@ -215,10 +227,13 @@ Per aggiornare, scarica la release più recente e sostituisci l'app in Applicazi
 | **Mixer** | Una nuova tab del notch con uno slider verticale per ogni app che emette suono (0–150%), nativo e senza driver. Vedi sotto. |
 | **Spotify ovunque** | Mostra cosa ascolti su telefono, casse o TV, anche con l'app Spotify chiusa sul Mac. Funziona con **Spotify Free**, tramite Last.fm. |
 | **Stato di attesa discreto** | Quando non suona nulla su nessun dispositivo, una scheda Spotify sobria sostituisce il brano segnaposto. |
-| **Widget nella home** | Componi la home come i widget di iPhone: Musica, Calendario, Batteria Bluetooth, Meteo e Specchio. Fino a 1 grande + 2 piccoli; il notch si adatta. |
+| **Widget nella home** | Componi la home come i widget di iPhone: Musica, Calendario, Batteria Bluetooth, Meteo, Specchio, Monitor di sistema e Utilizzo AI. Fino a 1 grande + 2 piccoli; il notch si adatta. |
 | **Batteria Bluetooth** | AirPods e Beats mostrano sinistra, destra e custodia; altre cuffie e casse una sola percentuale. |
 | **Meteo** | Scheda in stile Apple con il cielo e il movimento della condizione attuale. Può prendere il posto della batteria quando non c'è nulla collegato. |
 | **MacRemote** | Una nuova tab del notch che avvia **[MacRemote](https://github.com/jimmyxan/MacRemote)** e mostra il QR per associare l'iPhone. Inclusa nell'app. |
+| **Monitor di sistema** | CPU, memoria, GPU, temperatura di CPU e GPU: scegline uno o due, ciascuno con un grafico dal vivo degli ultimi 2 minuti. |
+| **Utilizzo AI** | I limiti del tuo piano Claude o Codex a colpo d'occhio: finestra di 5 ore e settimanale come anelli concentrici. |
+| **Avviso aggiornamenti** | Una nuova release su GitHub viene segnalata nell'app: aggiorna subito o ricevi un promemoria il giorno dopo. |
 
 ### Widget nella home
 
@@ -230,11 +245,20 @@ La home del notch aperto è un insieme di widget che scegli e disponi in **Impos
 - **Meteo**: dati da [Open-Meteo](https://open-meteo.com) (gratuito, senza chiave). Pioggia, neve, temporali, nuvole e nebbia sono animati, con discrezione. La posizione arriva da Localizzazione o, se non la concedi, dall'indirizzo IP; dalle Impostazioni puoi concederla di nuovo o aggiornare. Senza connessione internet il widget mostra la mascotte di Claude Code che piange sotto una nuvola di pioggia (immagine sopra).
 - **Meteo quando non c'è nulla collegato** (attivo di default): finché nessun dispositivo Bluetooth è collegato, al posto della batteria compare il meteo, che torna batteria appena un dispositivo si collega.
 
+<p align="center">
+  <img src="docs/widget-system-monitor.png" alt="System monitor widget: memory and CPU with 2-minute graphs" width="300">
+  &nbsp;&nbsp;
+  <img src="docs/widget-ai-usage.png" alt="AI usage widget: Claude 5-hour and weekly limits as concentric rings" width="300">
+</p>
+
+- **Monitor di sistema**: scegli fino a due parametri tra CPU, Memoria, GPU, temperatura CPU e temperatura GPU (Impostazioni › Widgets). Ognuno mostra il valore attuale e un grafico degli ultimi 2 minuti, così i picchi si vedono subito; passa il mouse per vedere il picco dei 2 minuti. Campiona ogni 3 secondi solo finché il widget è nel notch, con un costo di microsecondi per CPU e memoria. Le temperature sono la media dei sensori del die di CPU e GPU (Apple silicon).
+- **Utilizzo AI**: quanto ti resta dei limiti di **Claude** (Pro / Max) o **Codex** (ChatGPT, anche piano gratuito). L'anello esterno è la finestra di 5 ore, quello interno la settimana; passa il mouse per vedere quando si azzerano. Nessuna chiave API: usa l'accesso di Claude Code (`claude`) o di Codex (`codex login`), e Impostazioni › Widgets ti guida passo per passo. L'accesso non lascia mai il Mac, se non per leggere i limiti da Anthropic o OpenAI.
+
 ### MacRemote
 
 La tab **MacRemote**, accanto al Mixer, integra **[MacRemote](https://github.com/jimmyxan/MacRemote)** ([macremote.it](https://www.macremote.it)), la mia app per comandare il Mac dall'iPhone sulla rete locale: volume, media, luminosità, tastiera, touchpad e altro, da una pagina web in Safari. Niente da installare sul telefono.
 
-- **Inclusa in ogni installazione**: MacRemote viene compilata dal suo repository (un submodule git) e inserita dentro `TheBoringNotch.app`. Non c'è altro da scaricare.
+- **Inclusa in ogni installazione**: MacRemote viene compilata dal suo repository (un submodule git) e inserita dentro `DullNotch.app`. Non c'è altro da scaricare.
 - **Avvia → inquadra → fatto**: premi **Start MacRemote**, inquadra il QR con la fotocamera dell'iPhone (stessa Wi-Fi) e si apre il telecomando.
 - **Copy link**, **New code** (i telefoni associati con il vecchio link smettono di funzionare) e **Stop** (MacRemote si chiude del tutto).
 - Se usi già MacRemote installata a parte, la tab usa quella invece di avviarne una seconda copia.
@@ -267,7 +291,7 @@ La Web API di Spotify ora richiede Premium. Last.fm no: Spotify invia a Last.fm 
 
 1. **Crea un account Last.fm** su [last.fm/join](https://www.last.fm/join) (salta se ne hai già uno).
 2. **Collega Spotify**: apri [last.fm/settings/applications](https://www.last.fm/settings/applications) e premi **Connect** accanto a *Spotify Scrobbling*.
-3. **Ottieni una chiave API gratuita**: vai su [last.fm/api/account/create](https://www.last.fm/api/account/create). Inserisci un nome qualsiasi (per esempio *TheBoringNotch*) e una breve descrizione. Lascia vuoto *Callback URL*. Invia e copia la **API key**. Lo *Shared secret* non serve: non incollarlo da nessuna parte.
+3. **Ottieni una chiave API gratuita**: vai su [last.fm/api/account/create](https://www.last.fm/api/account/create). Inserisci un nome qualsiasi (per esempio *DullNotch*) e una breve descrizione. Lascia vuoto *Callback URL*. Invia e copia la **API key**. Lo *Shared secret* non serve: non incollarlo da nessuna parte.
 4. **Configura il notch**: apri le impostazioni del notch › **Media**, imposta **Music Source** su **Spotify**, poi compila **Last.fm username** e **Last.fm API key** in *Spotify on other devices*.
 5. **Prova**: chiudi Spotify sul Mac e fai partire un brano dal telefono. Entro circa 15 secondi il notch mostra il brano. Il tuo profilo Last.fm dovrebbe indicare *Scrobbling now*.
 

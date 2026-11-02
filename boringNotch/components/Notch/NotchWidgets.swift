@@ -13,7 +13,7 @@ import SwiftUI
 // MARK: - Model
 
 enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
-    case music, bluetoothBattery, calendar, mirror, weather
+    case music, bluetoothBattery, calendar, mirror, weather, aiUsage, systemMonitor
 
     var id: String { rawValue }
 
@@ -30,7 +30,7 @@ enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
         switch self {
         case .music: return 330
         case .calendar: return 210
-        case .bluetoothBattery, .mirror, .weather: return 150
+        case .bluetoothBattery, .mirror, .weather, .aiUsage, .systemMonitor: return 150
         }
     }
 
@@ -50,6 +50,8 @@ enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
         case .calendar: return "Calendar"
         case .mirror: return "Mirror"
         case .weather: return "Weather"
+        case .aiUsage: return "AI usage"
+        case .systemMonitor: return "System monitor"
         }
     }
 
@@ -60,6 +62,8 @@ enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
         case .calendar: return "calendar"
         case .mirror: return "web.camera"
         case .weather: return "cloud.sun.fill"
+        case .aiUsage: return "gauge.with.dots.needle.67percent"
+        case .systemMonitor: return "waveform.path.ecg"
         }
     }
 }
@@ -222,7 +226,7 @@ private struct BatteryRing: View {
 }
 
 /// Glassy card used by the small widgets: soft vertical gradient + hairline highlight.
-private struct WidgetCard: ViewModifier {
+struct WidgetCard: ViewModifier {
     var highlighted = false
 
     func body(content: Content) -> some View {
@@ -480,6 +484,8 @@ private struct GenericWidgetTile: View {
             case .bluetoothBattery: battery
             case .mirror: mirror
             case .weather: weather
+            case .aiUsage: aiUsage
+            case .systemMonitor: systemMonitor
             }
         }
         .frame(width: widget.width, height: Self.height)
@@ -544,6 +550,21 @@ private struct GenericWidgetTile: View {
         WeatherContent(report: WeatherReport(city: "Cupertino", temperature: 22, high: 25, low: 14, code: 1, isDay: true, source: .device))
     }
 
+    private var aiUsage: some View {
+        AIUsageContent(provider: Defaults[.aiUsageProvider], state: .ready(AIUsage(
+            session: AIUsageWindow(usedPercent: 28), weekly: AIUsageWindow(usedPercent: 59))))
+    }
+
+    private var systemMonitor: some View {
+        let now = Date()
+        let wave = { (base: Double, amp: Double) in
+            (0..<40).map { i in MetricSample(time: now.addingTimeInterval(Double(i - 39) * 3), value: base + amp * sin(Double(i) / 3)) }
+        }
+        return SystemMonitorContent(metrics: Defaults[.systemMonitorMetrics],
+                                    history: [.cpu: wave(30, 18), .memory: wave(62, 4), .gpu: wave(20, 15), .cpuTemp: wave(55, 8), .gpuTemp: wave(48, 6)],
+                                    now: now)
+    }
+
     private var mirror: some View {
         Image(systemName: "person.crop.square")
             .font(.system(size: 40, weight: .light))
@@ -591,6 +612,14 @@ struct WidgetsSettings: View {
 
             if widgets.contains(.weather) || (widgets.contains(.bluetoothBattery) && Defaults[.weatherReplacesIdleBluetooth]) {
                 WeatherLocationSettings()
+            }
+
+            if widgets.contains(.systemMonitor) {
+                SystemMonitorSettings()
+            }
+
+            if widgets.contains(.aiUsage) {
+                AIUsageSettings()
             }
 
             Section("In the notch") {
@@ -697,7 +726,8 @@ struct WidgetsSettings: View {
 
     private var tray: some View {
         let available = NotchWidget.allCases.filter { !widgets.contains($0) }
-        return HStack(spacing: 14) {
+        // scrolls instead of widening the pane: a wide tray squeezed the settings sidebar
+        return ScrollView(.horizontal, showsIndicators: false) { HStack(spacing: 14) {
             if available.isEmpty {
                 Text("All widgets are in the notch").foregroundStyle(.secondary)
             }
@@ -711,6 +741,8 @@ struct WidgetsSettings: View {
                 .transition(.scale(scale: 0.6).combined(with: .opacity))
                 .accessibilityLabel("\(w.title), drag into the notch")
             }
+        }
+        .padding(.horizontal, 2)
         }
         .frame(maxWidth: .infinity, minHeight: GenericWidgetTile.height * scale + 30)
         .padding(10)

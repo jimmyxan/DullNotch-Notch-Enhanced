@@ -36,16 +36,16 @@ struct DynamicNotchApp: App {
     }
 
     var body: some Scene {
-        MenuBarExtra("boring.notch", systemImage: "sparkle", isInserted: menuBarIconInserted) {
+        MenuBarExtra("DullNotch", systemImage: "sparkle", isInserted: menuBarIconInserted) {
             Button("Settings") {
                 DispatchQueue.main.async {
                     SettingsWindowController.shared.showWindow()
                 }
             }
             .keyboardShortcut(KeyEquivalent(","), modifiers: .command)
-            CheckForUpdatesView(updater: updaterController.updater)
+            CheckForUpdatesView()
             Divider()
-            Button("Restart Boring Notch") {
+            Button("Restart DullNotch") {
                 ApplicationRelauncher.restart()
             }
             Button("Quit", role: .destructive) {
@@ -287,6 +287,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        SystemMonitor.shared.activate()
+        UpdateChecker.shared.activate()
+        #if DEBUG
+        _ = UpdateChecker.selfCheck
+        #endif
 
         NotificationCenter.default.addObserver(
             self,

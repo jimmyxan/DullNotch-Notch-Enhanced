@@ -23,12 +23,12 @@
 		<dict/>
 	</array>
 	<key>NSLocationUsageDescription</key>
-	<string>Boring Notch uses your location to show the local weather in the notch.</string>
+	<string>DullNotch uses your location to show the local weather in the notch.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Boring Notch uses your location to show the local weather in the notch.</string>
+	<string>DullNotch uses your location to show the local weather in the notch.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Boring Notch reads the battery level of your connected Bluetooth devices, like AirPods.</string>
+	<string>DullNotch reads the battery level of your connected Bluetooth devices, like AirPods.</string>
 	<key>NSAudioCaptureUsageDescription</key>
-	<string>Boring Notch captures app audio to change each app's volume in the Mixer.</string>
+	<string>DullNotch captures app audio to change each app's volume in the Mixer.</string>
 </dict>
 </plist>
