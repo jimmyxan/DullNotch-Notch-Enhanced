@@ -237,7 +237,7 @@ struct ContentView: View {
 
             if isTargeted {
                 if vm.notchState == .closed {
-                    coordinator.currentView = .shelf
+                    coordinator.showViewForDrag()
                     doOpen()
                 }
                 return
@@ -381,6 +381,9 @@ struct ContentView: View {
                     case .remote:
                         MacRemoteView()
                             .frame(maxWidth: openNotchSize.width - openNotchHorizontalInset)
+                    case .converter:
+                        ConverterView()
+                            .frame(maxWidth: openNotchSize.width - openNotchHorizontalInset)
                     }
                 }
                 .transition(
@@ -520,13 +523,17 @@ struct ContentView: View {
 
     @ViewBuilder
     var dragDetector: some View {
-        if Defaults[.boringShelf] && vm.notchState == .closed {
+        if (coordinator.dragOpensConverter || (Defaults[.boringShelf] && Defaults[.notchTabs].contains(.shelf))) && vm.notchState == .closed {
             Color.clear
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .contentShape(Rectangle())
         .onDrop(of: [.fileURL, .url, .utf8PlainText, .plainText, .data], isTargeted: $vm.dragDetectorTargeting) { providers in
             vm.dropEvent = true
-            ShelfStateViewModel.shared.load(providers)
+            if coordinator.dragOpensConverter {
+                ConverterModel.shared.load(providers)
+            } else {
+                ShelfStateViewModel.shared.load(providers)
+            }
             return true
         }
         } else {

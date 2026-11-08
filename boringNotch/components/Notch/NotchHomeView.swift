@@ -522,11 +522,13 @@ struct NotchHomeView: View {
             ForEach(shown) { widget in
                 widgetView(widget)
                     .frame(width: widget.width)
+                    .modifier(LumenWidgetReaction(widget: widget))
                     .transition(.scale(scale: 0.85).combined(with: .opacity))
             }
         }
         .frame(width: NotchWidget.homeWidth(shown))
         .animation(expandAnimation, value: shown)
+        .modifier(LumenStage(shown: shown))
         .transition(.asymmetric(insertion: .opacity.combined(with: .move(edge: .top)), removal: .opacity))
         .blur(radius: vm.notchState == .closed ? 30 : 0)
     }
@@ -566,6 +568,105 @@ struct NotchHomeView: View {
                 withAnimation(expandAnimation) { batteryExpanded = true }
             }
         }
+    }
+}
+
+// MARK: - Lumen
+
+extension Defaults.Keys {
+    static let lumenEnabled = Key<Bool>("lumenEnabled", default: true)
+}
+
+/// Everything Lumen needs to know about a widget. It finds the widgets on screen by itself, so a
+/// new one only has to say what it is here: positions, sizes and order come from the layout.
+private extension NotchWidget {
+    var lumenKind: LumenCardKind {
+        switch self {
+        case .music: return .music
+        case .weather: return .weather
+        case .quote, .quoteLarge: return .quote
+        case .bluetoothBattery, .calendar, .mirror, .aiUsage, .systemMonitor: return .other
+        }
+    }
+
+    /// Solid widgets hide Lumen completely when it passes behind them.
+    var isGlass: Bool { self != .weather && self != .mirror }
+}
+
+private struct LumenAnchor {
+    let widget: NotchWidget
+    let bounds: Anchor<CGRect>
+}
+
+private struct LumenAnchorKey: PreferenceKey {
+    static let defaultValue: [LumenAnchor] = []
+    static func reduce(value: inout [LumenAnchor], nextValue: () -> [LumenAnchor]) {
+        value.append(contentsOf: nextValue())
+    }
+}
+
+/// Reports where a widget is, and moves it when Lumen pushes or bumps into it.
+private struct LumenWidgetReaction: ViewModifier {
+    let widget: NotchWidget
+    @ObservedObject private var director = LumenDirector.shared
+
+    func body(content: Content) -> some View {
+        content
+            .anchorPreference(key: LumenAnchorKey.self, value: .bounds) { [LumenAnchor(widget: widget, bounds: $0)] }
+            .offset(director.offsets[widget.rawValue] ?? .zero)
+    }
+}
+
+/// Puts the Lumen layers behind and in front of the widget row and feeds the brain.
+/// The content stays in one place whether Lumen is on or not, so that toggling it, or going
+/// to and from an empty row, does not rebuild the widgets.
+private struct LumenStage: ViewModifier {
+    let shown: [NotchWidget]
+    @Default(.lumenEnabled) private var enabled
+
+    private var isActive: Bool { enabled && !shown.isEmpty }
+
+    func body(content: Content) -> some View {
+        content
+            .backgroundPreferenceValue(LumenAnchorKey.self) { layer(behind: true, $0) }
+            .overlayPreferenceValue(LumenAnchorKey.self) { layer(behind: false, $0) }
+            .onChange(of: isActive, initial: true) { _, active in
+                if !active { LumenDirector.shared.stageDisappeared() }
+                #if DEBUG
+                _ = LumenBrain.selfCheck
+                _ = LumenRoutes.selfCheck
+                _ = LumenDirector.selfCheckOnce
+                #endif
+            }
+            .onDisappear { LumenDirector.shared.stageDisappeared() }
+    }
+
+    @ViewBuilder
+    private func layer(behind: Bool, _ anchors: [LumenAnchor]) -> some View {
+        if isActive {
+            GeometryReader { geometry in
+                LumenLayerView(
+                    behind: behind,
+                    cards: anchors.map {
+                        LumenCard(id: $0.widget.rawValue, kind: $0.widget.lumenKind, rect: geometry[$0.bounds], isGlass: $0.widget.isGlass)
+                    },
+                    inputs: inputs
+                )
+            }
+        }
+    }
+
+    private func inputs() -> LumenInputs {
+        var inputs = LumenInputs()
+        inputs.musicPlaying = MusicManager.shared.isPlaying
+        inputs.lowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
+        inputs.widgetCount = shown.count
+        inputs.hasMusicWidget = shown.contains(.music)
+        inputs.hasQuoteWidget = shown.contains(.quote) || shown.contains(.quoteLarge)
+        inputs.hasSmallWidget = shown.contains { $0.width <= 220 }
+        let report = WeatherManager.shared.report
+        inputs.sunVisible = shown.contains(.weather) && report?.kind == .clear && report?.isDay == true
+        return inputs
     }
 }
 

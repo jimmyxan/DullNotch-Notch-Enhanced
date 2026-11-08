@@ -104,6 +104,7 @@ final class WeatherManager: NSObject, ObservableObject {
     private var lastFetch: Date?
     private var timer: Timer?
     private var viewers = 0
+    private var askedForLocation = false
 
     override init() {
         authorization = locationManager.authorizationStatus
@@ -141,7 +142,14 @@ final class WeatherManager: NSObject, ObservableObject {
         case .authorizedAlways, .authorized:
             locationManager.requestLocation()
         case .notDetermined:
-            locationManager.requestWhenInUseAuthorization()
+            // Every open of the notch lands here, so ask once per launch. Not persisted: macOS
+            // forgets the answer when the code signature changes, and a saved flag would then
+            // block the prompt and leave the widget on IP location for good.
+            if !askedForLocation {
+                askedForLocation = true
+                locationManager.requestWhenInUseAuthorization()
+            }
+            Task { await fetchUsingIP() } // the widget should not wait for the answer
         default:
             Task { await fetchUsingIP() }
         }
@@ -217,6 +225,8 @@ final class WeatherManager: NSObject, ObservableObject {
               let (data, _) = try? await URLSession.shared.data(from: url),
               let r = try? JSONDecoder().decode(Response.self, from: data)
         else { return }
+        // A slow IP lookup started before the permission was granted must not replace the real position.
+        if source == .ip, report?.source == .device, authorization == .authorizedAlways { return }
         report = WeatherReport(
             city: city,
             temperature: Int(r.current.temperature_2m.rounded()),

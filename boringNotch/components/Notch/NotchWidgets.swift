@@ -586,7 +586,9 @@ struct WidgetsSettings: View {
     @State private var trayTargeted = false
     @State private var rejected = 0
 
-    private let scale: CGFloat = 0.6
+    // Widest notch (780 pt) × scale + 46 pt of Form margins must fit the 500 pt detail pane
+    // (700 window - 200 sidebar), or the split view pushes the sidebar off the left edge.
+    private let scale: CGFloat = 0.58
     private let widgetAnimation = Animation.spring(response: 0.45, dampingFraction: 0.82)
     private var used: Int { widgets.reduce(0) { $0 + $1.units } }
 
@@ -625,6 +627,14 @@ struct WidgetsSettings: View {
 
             if widgets.contains(.aiUsage) {
                 AIUsageSettings()
+            }
+
+            Section {
+                Defaults.Toggle(key: .lumenEnabled) {
+                    Text("Lumen")
+                }
+            } footer: {
+                Text("A small moth that lives on your widgets. It sleeps when you leave it alone and in Low Power Mode.")
             }
 
             Section("In the notch") {

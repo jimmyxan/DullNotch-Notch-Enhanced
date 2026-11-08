@@ -88,6 +88,8 @@ When a new version is published on GitHub, DullNotch tells you: **Update Now** o
 | **Bluetooth battery** | AirPods and Beats show left, right and case; other headphones and speakers show one percentage. |
 | **Weather** | Apple-style card with the sky and motion of the current condition. Can stand in for the battery widget while nothing is connected. |
 | **MacRemote** | A new notch tab that starts **[MacRemote](https://github.com/jimmyxan/MacRemote)** and shows the QR code to pair your iPhone. Bundled with the app. |
+| **Convert** | A new notch tab that converts images and text documents, PDF included, without uploading anything. Drag a file over the notch and pick the format. See below. |
+| **Notch tabs** | Choose which tabs appear in the notch, each with a short description on hover. |
 | **System monitor** | CPU, memory, GPU, CPU and GPU temperature: pick one or two, each with a live graph of the last 2 minutes. |
 | **AI usage** | Your Claude or Codex plan limits at a glance: 5-hour and weekly windows as concentric rings. |
 | **Update notice** | A new GitHub release is announced in the app: update now or get a reminder tomorrow. |
@@ -144,6 +146,23 @@ The Mixer tab is built on the audio engine of **[OpenSoundSource](https://github
 - **Fine control in a small space**: relative dragging (the knob never jumps), hold **⌥ Option** for 4× finer steps, click the percentage to reset, click the icon to mute.
 
 The first time you move a fader, macOS asks for permission to capture app audio.
+
+### Convert
+
+<p align="center">
+  <img src="docs/convert.gif" alt="Convert tab: an AVIF image dragged onto the notch, JPEG chosen, saved next to the original" width="860">
+</p>
+
+The **Convert** tab changes a file's format right on your Mac, with the frameworks macOS already has (ImageIO, PDFKit, AppKit). Nothing is uploaded and nothing leaves the computer.
+
+- **Drag and drop**: drag a file over the notch and Convert opens by itself. The format is detected and shown as a badge (AVIF, PNG, DOCX…).
+- **Only formats that make sense**: you see only targets that fit the source, never the format you already have.
+- **Images**: reads PNG, JPEG, HEIC, AVIF, WebP, TIFF, GIF, BMP and camera RAW; saves as PNG, JPEG, HEIC, TIFF, GIF, BMP or PDF. GIF and TIFF keep every frame.
+- **Text**: reads TXT, Markdown, RTF, HTML, DOCX, DOC and ODT; saves as TXT, RTF, HTML, DOCX, ODT, DOC or PDF.
+- **PDF**: extract the text (TXT, RTF, DOCX…) or turn the pages into images. A scanned PDF has no text to extract, and Convert tells you so.
+- **You choose where it goes**: the standard Save dialog opens on the original's folder, with the new name ready. Then **Show in Finder** or **Convert another**.
+
+In **Settings → General → Notch tabs** you choose which tabs to show and whether a dragged file opens Convert or the Shelf. Home, Mixer, MacRemote and Convert are on by default; the Shelf is off.
 
 ### Performance
 
@@ -238,6 +257,8 @@ Quando su GitHub esce una nuova versione, DullNotch te lo dice: **Update Now** a
 | **Batteria Bluetooth** | AirPods e Beats mostrano sinistra, destra e custodia; altre cuffie e casse una sola percentuale. |
 | **Meteo** | Scheda in stile Apple con il cielo e il movimento della condizione attuale. Può prendere il posto della batteria quando non c'è nulla collegato. |
 | **MacRemote** | Una nuova tab del notch che avvia **[MacRemote](https://github.com/jimmyxan/MacRemote)** e mostra il QR per associare l'iPhone. Inclusa nell'app. |
+| **Converti** | Una nuova tab del notch che converte immagini e documenti di testo, PDF compresi, senza caricare nulla online. Trascina un file sul notch e scegli il formato. Vedi sotto. |
+| **Tab del notch** | Scegli quali tab mostrare nel notch; ognuna ha una breve descrizione al passaggio del mouse. |
 | **Monitor di sistema** | CPU, memoria, GPU, temperatura di CPU e GPU: scegline uno o due, ciascuno con un grafico dal vivo degli ultimi 2 minuti. |
 | **Utilizzo AI** | I limiti del tuo piano Claude o Codex a colpo d'occhio: finestra di 5 ore e settimanale come anelli concentrici. |
 | **Avviso aggiornamenti** | Una nuova release su GitHub viene segnalata nell'app: aggiorna subito o ricevi un promemoria il giorno dopo. |
@@ -292,6 +313,23 @@ La tab Mixer usa il motore audio di **[OpenSoundSource](https://github.com/jimmy
 - **Controllo fine in poco spazio**: trascinamento relativo (il pallino non salta), tieni premuto **⌥ Option** per passi 4 volte più fini, clic sulla percentuale per tornare al 100%, clic sull'icona per silenziare.
 
 La prima volta che muovi uno slider, macOS chiede il permesso di catturare l'audio delle app.
+
+### Converti
+
+<p align="center">
+  <img src="docs/convert.gif" alt="Tab Converti: un'immagine AVIF trascinata sul notch, scelto JPEG, salvata accanto all'originale" width="860">
+</p>
+
+La tab **Converti** (*Convert* nell'app) cambia il formato di un file direttamente sul Mac, con gli strumenti che macOS ha già (ImageIO, PDFKit, AppKit). Non carica nulla online e nulla esce dal computer.
+
+- **Trascina e rilascia**: trascina un file sul notch e Converti si apre da sola. Il formato viene riconosciuto e mostrato in un'etichetta (AVIF, PNG, DOCX…).
+- **Solo formati sensati**: vedi solo destinazioni coerenti con il file di partenza, mai il formato che hai già.
+- **Immagini**: legge PNG, JPEG, HEIC, AVIF, WebP, TIFF, GIF, BMP e RAW delle fotocamere; salva in PNG, JPEG, HEIC, TIFF, GIF, BMP o PDF. GIF e TIFF tengono tutti i fotogrammi.
+- **Testo**: legge TXT, Markdown, RTF, HTML, DOCX, DOC e ODT; salva in TXT, RTF, HTML, DOCX, ODT, DOC o PDF.
+- **PDF**: estrai il testo (TXT, RTF, DOCX…) o trasforma le pagine in immagini. Un PDF scansionato non ha testo da estrarre, e Converti te lo dice.
+- **Scegli tu dove salvarlo**: si apre la finestra Salva di macOS nella cartella dell'originale, con il nuovo nome già pronto. Poi **Show in Finder** o **Convert another**.
+
+In **Impostazioni → General → Notch tabs** scegli quali tab mostrare e se un file trascinato apre Converti o lo Shelf. Di default sono attive Home, Mixer, MacRemote e Converti; lo Shelf è spento.
 
 ### Prestazioni
 

@@ -172,6 +172,11 @@ extension Defaults.Keys {
     // Option key modifier behaviour for media keys
     static let optionKeyAction = Key<OptionKeyAction>("optionKeyAction", default: OptionKeyAction.openSettings)
     
+    // Notch tabs shown in the header (Home is always shown)
+    static let notchTabs = Key<[NotchViews]>("notchTabs", default: [.home, .mixer, .remote, .converter])
+    // Dragging a file over the notch opens Convert instead of the Shelf
+    static let dragOpensConverter = Key<Bool>("dragOpensConverter", default: true)
+
     // MARK: Shelf
     static let boringShelf = Key<Bool>("boringShelf", default: true)
     static let openShelfByDefault = Key<Bool>("openShelfByDefault", default: true)

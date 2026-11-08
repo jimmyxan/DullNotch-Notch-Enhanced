@@ -110,7 +110,8 @@ struct SettingsView: View {
                     GeneralSettings()
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // minWidth 0: a page wider than the pane must not push the sidebar off the window's left edge.
+            .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationSplitViewStyle(.balanced)
         .toolbar(removing: .sidebarToggle)
@@ -152,6 +153,18 @@ struct GeneralSettings: View {
     @Default(.automaticallySwitchDisplay) var automaticallySwitchDisplay
     @Default(.enableGestures) var enableGestures
     @Default(.openNotchOnHover) var openNotchOnHover
+    @Default(.notchTabs) var notchTabs
+
+    private func tabBinding(_ view: NotchViews) -> Binding<Bool> {
+        Binding(
+            get: { view == .home || notchTabs.contains(view) },
+            set: { on in
+                notchTabs.removeAll { $0 == view }
+                if on { notchTabs.append(view) }
+                if !on && coordinator.currentView == view { coordinator.currentView = .home }
+            }
+        )
+    }
     
 
     var body: some View {
@@ -198,6 +211,34 @@ struct GeneralSettings: View {
                     .disabled(showOnAllDisplays)
             } header: {
                 Text("System features")
+            }
+
+            Section {
+                ForEach(tabs) { tab in
+                    Toggle(isOn: tabBinding(tab.view)) {
+                        HStack(spacing: 8) {
+                            Image(systemName: tab.icon)
+                                .frame(width: 18)
+                                .foregroundStyle(.secondary)
+                            Text(tab.label)
+                            Image(systemName: "info.circle")
+                                .foregroundStyle(.tertiary)
+                                .help(tab.description)
+                        }
+                    }
+                    .tint(.effectiveAccent)
+                    .disabled(tab.view == .home)
+                }
+                Defaults.Toggle(key: .dragOpensConverter) {
+                    Text("Open Convert when dragging a file over the notch")
+                }
+                .disabled(!notchTabs.contains(.converter))
+            } header: {
+                Text("Notch tabs")
+            } footer: {
+                Text("When on, Convert takes dragged files instead of the Shelf.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section {

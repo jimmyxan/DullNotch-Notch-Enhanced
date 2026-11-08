@@ -121,6 +121,9 @@
 		C0FFEE012F00000000000105 /* AIUsageWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000106 /* AIUsageWidget.swift */; };
 		C0FFEE012F00000000000107 /* SystemMonitorWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000108 /* SystemMonitorWidget.swift */; };
 		C0FFEE012F00000000000109 /* QuoteWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000010A /* QuoteWidget.swift */; };
+		C0FFEE012F0000000000010B /* LumenBrain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000010C /* LumenBrain.swift */; };
+		C0FFEE012F0000000000010D /* LumenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000010E /* LumenView.swift */; };
+		C0FFEE012F0000000000020D /* ConverterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000020E /* ConverterView.swift */; };
 		C0FFEE012F00000000000006 /* MacRemoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000007 /* MacRemoteView.swift */; };
 		B10348D92C74E56000475897 /* ConditionalModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10348D82C74E56000475897 /* ConditionalModifier.swift */; };
 		B10F84A32C6C9596009F3026 /* TestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10F84A22C6C9596009F3026 /* TestView.swift */; };
@@ -297,6 +300,9 @@
 		C0FFEE012F00000000000106 /* AIUsageWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsageWidget.swift; sourceTree = "<group>"; };
 		C0FFEE012F00000000000108 /* SystemMonitorWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMonitorWidget.swift; sourceTree = "<group>"; };
 		C0FFEE012F0000000000010A /* QuoteWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteWidget.swift; sourceTree = "<group>"; };
+		C0FFEE012F0000000000010C /* LumenBrain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LumenBrain.swift; sourceTree = "<group>"; };
+		C0FFEE012F0000000000010E /* LumenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LumenView.swift; sourceTree = "<group>"; };
+		C0FFEE012F0000000000020E /* ConverterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConverterView.swift; sourceTree = "<group>"; };
 		C0FFEE012F00000000000007 /* MacRemoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacRemoteView.swift; sourceTree = "<group>"; };
 		B10348D82C74E56000475897 /* ConditionalModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConditionalModifier.swift; sourceTree = "<group>"; };
 		B10F84A22C6C9596009F3026 /* TestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestView.swift; sourceTree = "<group>"; };
@@ -727,6 +733,9 @@
 				C0FFEE012F00000000000106 /* AIUsageWidget.swift */,
 				C0FFEE012F00000000000108 /* SystemMonitorWidget.swift */,
 				C0FFEE012F0000000000010A /* QuoteWidget.swift */,
+				C0FFEE012F0000000000010C /* LumenBrain.swift */,
+				C0FFEE012F0000000000010E /* LumenView.swift */,
+				C0FFEE012F0000000000020E /* ConverterView.swift */,
 				C0FFEE012F00000000000007 /* MacRemoteView.swift */,
 				14D570C52C5F38210011E668 /* BoringHeader.swift */,
 				14D570D12C5F6C6A0011E668 /* BoringExtrasMenu.swift */,
@@ -1010,6 +1019,9 @@
 				C0FFEE012F00000000000105 /* AIUsageWidget.swift in Sources */,
 				C0FFEE012F00000000000107 /* SystemMonitorWidget.swift in Sources */,
 				C0FFEE012F00000000000109 /* QuoteWidget.swift in Sources */,
+				C0FFEE012F0000000000010B /* LumenBrain.swift in Sources */,
+				C0FFEE012F0000000000010D /* LumenView.swift in Sources */,
+				C0FFEE012F0000000000020D /* ConverterView.swift in Sources */,
 				C0FFEE012F00000000000006 /* MacRemoteView.swift in Sources */,
 				B172AAC02C95DA0B001623F1 /* InlineHUD.swift in Sources */,
 				14E9FEAA2C70BF610062E83F /* DownloadView.swift in Sources */,
@@ -1100,7 +1112,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = BoringNotchXPCHelper;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = theboringteam.boringnotch.BoringNotchXPCHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -1125,7 +1137,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = BoringNotchXPCHelper;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = theboringteam.boringnotch.BoringNotchXPCHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -1300,7 +1312,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = theboringteam.boringnotch;
 				PRODUCT_NAME = DullNotch;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1355,7 +1367,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.3.0;
+				MARKETING_VERSION = 1.4.0;
 				PRODUCT_BUNDLE_IDENTIFIER = theboringteam.boringnotch;
 				PRODUCT_NAME = DullNotch;
 				PROVISIONING_PROFILE_SPECIFIER = "";

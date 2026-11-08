@@ -297,4 +297,19 @@ class BoringViewCoordinator: ObservableObject {
     func showEmpty() {
         currentView = .home
     }
+
+    /// Convert takes dragged files when the setting is on and its tab is visible.
+    var dragOpensConverter: Bool {
+        Defaults[.dragOpensConverter] && Defaults[.notchTabs].contains(.converter)
+    }
+
+    /// A drag over the notch opens Convert or the Shelf (if visible); it never leaves Convert.
+    func showViewForDrag() {
+        guard currentView != .converter else { return }
+        if dragOpensConverter {
+            currentView = .converter
+        } else if Defaults[.notchTabs].contains(.shelf) {
+            currentView = .shelf
+        }
+    }
 }
