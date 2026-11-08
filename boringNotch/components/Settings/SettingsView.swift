@@ -133,6 +133,28 @@ struct SettingsView: View {
     }
 }
 
+/// An ⓘ that shows a short description in a popover while the pointer is over it.
+/// (`.help` tooltips don't appear inside a Toggle's label in a Form.)
+struct HoverInfo: View {
+    let text: String
+    @State private var shown = false
+
+    var body: some View {
+        Image(systemName: "info.circle")
+            .foregroundStyle(shown ? .primary : .secondary)
+            .contentShape(Rectangle())
+            .onHover { shown = $0 }
+            .popover(isPresented: $shown, arrowEdge: .bottom) {
+                Text(text)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: 240, alignment: .leading)
+                    .padding(12)
+            }
+            .accessibilityLabel(text)
+    }
+}
+
 struct GeneralSettings: View {
     @State private var screens: [(uuid: String, name: String)] = NSScreen.screens.compactMap { screen in
         guard let uuid = screen.displayUUID else { return nil }
@@ -221,9 +243,7 @@ struct GeneralSettings: View {
                                 .frame(width: 18)
                                 .foregroundStyle(.secondary)
                             Text(tab.label)
-                            Image(systemName: "info.circle")
-                                .foregroundStyle(.tertiary)
-                                .help(tab.description)
+                            HoverInfo(text: tab.description)
                         }
                     }
                     .tint(.effectiveAccent)

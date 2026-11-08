@@ -175,3 +175,7 @@ Sintomo: entrando in Widgets la barra laterale delle Impostazioni si sposta cont
 
 ### 2026-11-08 — Release 1.4.0
 - `MARKETING_VERSION` 1.3.0 → 1.4.0 (serve all'avviso aggiornamenti, che confronta il tag con la versione). Release compilata con `-derivedDataPath` nello scratchpad e `ENABLE_HARDENED_RUNTIME=NO`, zip con `ditto -c -k --sequesterRsrc --keepParent`. Prova: versione 1.4.0 nell'Info.plist, MacRemote incluso, `codesign` valido, app viva dopo 7 s.
+
+### 2026-11-08 — La "i" delle Notch tabs non mostrava nulla
+- Segnalato dall'utente sulla 1.4.0: `.help()` sull'icona dentro l'etichetta di un `Toggle` in un `Form` non mostra il tooltip. Causa probabile, non verificata: la riga del Form gestisce lei il passaggio del mouse.
+- Sostituito con `HoverInfo` (`SettingsView.swift`): popover aperto con `onHover`, sotto l'icona così non la copre. Build Debug riuscita; confermato funzionante dall'utente. Uscito nella **release 1.4.1** (stessa procedura della 1.4.0, app viva dopo 7 s).
