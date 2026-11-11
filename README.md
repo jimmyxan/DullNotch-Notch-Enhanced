@@ -90,6 +90,7 @@ When a new version is published on GitHub, DullNotch tells you: **Update Now** o
 | **MacRemote** | A new notch tab that starts **[MacRemote](https://github.com/jimmyxan/MacRemote)** and shows the QR code to pair your iPhone. Bundled with the app. |
 | **Convert** | A new notch tab that converts images and text documents, PDF included, without uploading anything. Drag a file over the notch and pick the format. See below. |
 | **Notch tabs** | Choose which tabs appear in the notch, each with a short description on hover. |
+| **Progress on the closed notch** | The closed notch shows what is in progress: a Clock timer, a download, charging, or what is left of your AI plan. One at a time, by priority, in three styles. See below. |
 | **System monitor** | CPU, memory, GPU, CPU and GPU temperature: pick one or two, each with a live graph of the last 2 minutes. |
 | **AI usage** | Your Claude or Codex plan limits at a glance: 5-hour and weekly windows as concentric rings. |
 | **Update notice** | A new GitHub release is announced in the app: update now or get a reminder tomorrow. |
@@ -164,10 +165,32 @@ The **Convert** tab changes a file's format right on your Mac, with the framewor
 
 In **Settings → General → Notch tabs** you choose which tabs to show and whether a dragged file opens Convert or the Shelf. Home, Mixer, MacRemote and Convert are on by default; the Shelf is off.
 
+### Progress on the closed notch
+
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="docs/progress-wings.png" alt="Closed notch widened with a timer icon on the left and the countdown 2:56 on the right" width="100%"><br><sub><b>Wings</b>: icon on the left, time or ring on the right</sub></td>
+    <td align="center" width="33%"><img src="docs/progress-wire.png" alt="Closed notch with an orange line running around its edge" width="100%"><br><sub><b>Wire</b>: a line that runs around the notch</sub></td>
+    <td align="center" width="33%"><img src="docs/progress-hybrid.png" alt="Closed notch with a timer icon on its left and an orange line around its edge" width="100%"><br><sub><b>Hybrid</b>: the line, plus one icon on the left</sub></td>
+  </tr>
+</table>
+
+The closed notch shows the progress of what is going on, without opening it. Only one thing is shown at a time; the first one in progress wins, in this order:
+
+1. **Clock timers**: a timer running in the macOS Clock app. The line starts full and drains, and turns red near the end.
+2. **Downloads**: a file being downloaded into your Downloads folder, with its percentage when the browser publishes it.
+3. **Charging**: only while the battery level is actually going up. A charge held at 80% is not shown.
+4. **AI quota**: what is left of your Claude or Codex 5-hour limit, shown when nothing else is in progress and the service is connected.
+
+In **Settings → Progress** you pick the style, turn each source on or off, and decide whether progress takes the place of music on the closed notch. The AI quota never replaces music.
+
+Timers are read from the Clock app's own data, with no extra permission. This relies on a format Apple does not document, so a macOS update may break it. A new timer or download can take up to 5 seconds to appear.
+
 ### Performance
 
 - The glass is composited by WindowServer: no screen capture and no per-frame CPU work. It exists only while the notch is open and the slider is above 0%.
 - The Mixer polls once per second only while its tab is visible, every 3 s while a custom volume is active, and not at all otherwise.
+- Progress on the closed notch checks the Clock timers and the Downloads folder every 5 s, and once per second only while a timer runs. With a timer running it used well under 1% of one CPU core in our measurements.
 - With Spotify closed, Last.fm is checked every 15 s while music plays and every 60 s when idle. Spotify is never launched in the background.
 
 ### Spotify on other devices with Last.fm (tutorial)
@@ -259,6 +282,7 @@ Quando su GitHub esce una nuova versione, DullNotch te lo dice: **Update Now** a
 | **MacRemote** | Una nuova tab del notch che avvia **[MacRemote](https://github.com/jimmyxan/MacRemote)** e mostra il QR per associare l'iPhone. Inclusa nell'app. |
 | **Converti** | Una nuova tab del notch che converte immagini e documenti di testo, PDF compresi, senza caricare nulla online. Trascina un file sul notch e scegli il formato. Vedi sotto. |
 | **Tab del notch** | Scegli quali tab mostrare nel notch; ognuna ha una breve descrizione al passaggio del mouse. |
+| **Avanzamento nel notch chiuso** | Il notch chiuso mostra ciò che è in corso: un timer di Orologio, un download, la ricarica o quanto resta del piano AI. Uno alla volta, per priorità, in tre stili. Vedi sotto. |
 | **Monitor di sistema** | CPU, memoria, GPU, temperatura di CPU e GPU: scegline uno o due, ciascuno con un grafico dal vivo degli ultimi 2 minuti. |
 | **Utilizzo AI** | I limiti del tuo piano Claude o Codex a colpo d'occhio: finestra di 5 ore e settimanale come anelli concentrici. |
 | **Avviso aggiornamenti** | Una nuova release su GitHub viene segnalata nell'app: aggiorna subito o ricevi un promemoria il giorno dopo. |
@@ -331,10 +355,32 @@ La tab **Converti** (*Convert* nell'app) cambia il formato di un file direttamen
 
 In **Impostazioni → General → Notch tabs** scegli quali tab mostrare e se un file trascinato apre Converti o lo Shelf. Di default sono attive Home, Mixer, MacRemote e Converti; lo Shelf è spento.
 
+### Avanzamento nel notch chiuso
+
+<table>
+  <tr>
+    <td align="center" width="33%"><img src="docs/progress-wings.png" alt="Notch chiuso allargato con l'icona del timer a sinistra e il conto alla rovescia 2:56 a destra" width="100%"><br><sub><b>Wings</b>: icona a sinistra, tempo o anello a destra</sub></td>
+    <td align="center" width="33%"><img src="docs/progress-wire.png" alt="Notch chiuso con una linea arancione che corre lungo il bordo" width="100%"><br><sub><b>Wire</b>: una linea che corre attorno al notch</sub></td>
+    <td align="center" width="33%"><img src="docs/progress-hybrid.png" alt="Notch chiuso con l'icona del timer a sinistra e una linea arancione lungo il bordo" width="100%"><br><sub><b>Hybrid</b>: la linea, più un'icona a sinistra</sub></td>
+  </tr>
+</table>
+
+Il notch chiuso mostra l'avanzamento di ciò che è in corso, senza aprirlo. Si vede una cosa sola alla volta; vince la prima in corso, in quest'ordine:
+
+1. **Timer di Orologio** (*Clock timers*): un timer avviato nell'app Orologio di macOS. La linea parte piena e si svuota, e diventa rossa verso la fine.
+2. **Download** (*Downloads*): un file in scaricamento nella cartella Download, con la percentuale quando il browser la pubblica.
+3. **Ricarica** (*Charging*): solo mentre il livello della batteria sale davvero. Una carica ferma all'80% non viene mostrata.
+4. **Quota AI** (*AI quota*): quanto resta del limite di 5 ore di Claude o Codex, mostrato quando non c'è altro in corso e il servizio è collegato.
+
+In **Impostazioni → Progress** scegli lo stile, accendi o spegni ogni fonte e decidi se l'avanzamento prende il posto della musica nel notch chiuso. La quota AI non sostituisce mai la musica.
+
+I timer sono letti dai dati dell'app Orologio, senza permessi aggiuntivi. Il formato non è documentato da Apple, quindi un aggiornamento di macOS può interromperne il funzionamento. Un timer o un download nuovo può comparire con fino a 5 secondi di ritardo.
+
 ### Prestazioni
 
 - Il vetro è composto da WindowServer: nessuna cattura dello schermo e nessun lavoro della CPU a ogni frame. Esiste solo a notch aperto e con lo slider sopra lo 0%.
 - Il Mixer si aggiorna una volta al secondo solo con la sua tab visibile, ogni 3 s se c'è un volume personalizzato attivo, altrimenti mai.
+- L'avanzamento nel notch chiuso controlla i timer di Orologio e la cartella Download ogni 5 s, e una volta al secondo solo mentre un timer è in corso. Con un timer in corso ha usato ben meno dell'1% di un core nelle nostre misure.
 - Con Spotify chiuso, Last.fm viene controllato ogni 15 s durante l'ascolto e ogni 60 s quando non suona nulla. Spotify non viene mai avviato in background.
 
 ### Spotify su altri dispositivi con Last.fm (tutorial)

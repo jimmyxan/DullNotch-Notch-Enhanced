@@ -119,6 +119,7 @@
 		C0FFEE012F00000000000001 /* NotchWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000002 /* NotchWidgets.swift */; };
 		C0FFEE012F00000000000003 /* WeatherWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000004 /* WeatherWidget.swift */; };
 		C0FFEE012F00000000000105 /* AIUsageWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000106 /* AIUsageWidget.swift */; };
+		C0FFEE012F00000000000301 /* NotchProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000302 /* NotchProgress.swift */; };
 		C0FFEE012F00000000000107 /* SystemMonitorWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000108 /* SystemMonitorWidget.swift */; };
 		C0FFEE012F00000000000109 /* QuoteWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000010A /* QuoteWidget.swift */; };
 		C0FFEE012F0000000000010B /* LumenBrain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000010C /* LumenBrain.swift */; };
@@ -298,6 +299,7 @@
 		C0FFEE012F00000000000002 /* NotchWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchWidgets.swift; sourceTree = "<group>"; };
 		C0FFEE012F00000000000004 /* WeatherWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherWidget.swift; sourceTree = "<group>"; };
 		C0FFEE012F00000000000106 /* AIUsageWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUsageWidget.swift; sourceTree = "<group>"; };
+		C0FFEE012F00000000000302 /* NotchProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchProgress.swift; sourceTree = "<group>"; };
 		C0FFEE012F00000000000108 /* SystemMonitorWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMonitorWidget.swift; sourceTree = "<group>"; };
 		C0FFEE012F0000000000010A /* QuoteWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteWidget.swift; sourceTree = "<group>"; };
 		C0FFEE012F0000000000010C /* LumenBrain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LumenBrain.swift; sourceTree = "<group>"; };
@@ -731,6 +733,7 @@
 				C0FFEE012F00000000000002 /* NotchWidgets.swift */,
 				C0FFEE012F00000000000004 /* WeatherWidget.swift */,
 				C0FFEE012F00000000000106 /* AIUsageWidget.swift */,
+				C0FFEE012F00000000000302 /* NotchProgress.swift */,
 				C0FFEE012F00000000000108 /* SystemMonitorWidget.swift */,
 				C0FFEE012F0000000000010A /* QuoteWidget.swift */,
 				C0FFEE012F0000000000010C /* LumenBrain.swift */,
@@ -1017,6 +1020,7 @@
 				C0FFEE012F00000000000001 /* NotchWidgets.swift in Sources */,
 				C0FFEE012F00000000000003 /* WeatherWidget.swift in Sources */,
 				C0FFEE012F00000000000105 /* AIUsageWidget.swift in Sources */,
+				C0FFEE012F00000000000301 /* NotchProgress.swift in Sources */,
 				C0FFEE012F00000000000107 /* SystemMonitorWidget.swift in Sources */,
 				C0FFEE012F00000000000109 /* QuoteWidget.swift in Sources */,
 				C0FFEE012F0000000000010B /* LumenBrain.swift in Sources */,
@@ -1112,7 +1116,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = BoringNotchXPCHelper;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = theboringteam.boringnotch.BoringNotchXPCHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -1137,7 +1141,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = BoringNotchXPCHelper;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = theboringteam.boringnotch.BoringNotchXPCHelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -1312,7 +1316,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = theboringteam.boringnotch;
 				PRODUCT_NAME = DullNotch;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1367,7 +1371,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 1.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = theboringteam.boringnotch;
 				PRODUCT_NAME = DullNotch;
 				PROVISIONING_PROFILE_SPECIFIER = "";

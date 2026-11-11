@@ -298,6 +298,29 @@ class BoringNotchXPCHelper: NSObject, BoringNotchXPCHelperProtocol {
     }
 }
 
+// MARK: - Clock timers
+
+extension BoringNotchXPCHelper {
+    /// Clock keeps its timers in `com.apple.mobiletimerd` › MTTimers › MTTimers[] › $MTTimer.
+    /// Running = MTTimerState 3, with the fire date in MTTimerFireTime › $MTTimerDate › MTTimerTimeDate
+    /// (seen on macOS 27.2). A stopped timer has state 1 and an interval instead of a date.
+    // ponytail: private, undocumented format; paused timers are ignored. If Apple changes it, no timer shows.
+    @objc func clockTimer(with reply: @escaping (Double, Double) -> Void) {
+        let domain = "com.apple.mobiletimerd" as CFString
+        CFPreferencesAppSynchronize(domain)
+        let timers = (CFPreferencesCopyAppValue("MTTimers" as CFString, domain) as? [String: Any])?["MTTimers"] as? [[String: Any]] ?? []
+        let running: [(Date, Double)] = timers.compactMap { entry in
+            guard let t = entry["$MTTimer"] as? [String: Any],
+                  (t["MTTimerState"] as? NSNumber)?.intValue == 3,
+                  let fire = ((t["MTTimerFireTime"] as? [String: Any])?["$MTTimerDate"] as? [String: Any])?["MTTimerTimeDate"] as? Date,
+                  let duration = (t["MTTimerDuration"] as? NSNumber)?.doubleValue, duration > 0 else { return nil }
+            return (fire, duration)
+        }
+        guard let next = running.min(by: { $0.0 < $1.0 }) else { return reply(-1, -1) }
+        reply(next.0.timeIntervalSince1970, next.1)
+    }
+}
+
 // MARK: - System sensors
 
 extension BoringNotchXPCHelper {

@@ -12,7 +12,9 @@ Memoria di progetto per le sessioni AI. Leggi questo file prima di esplorare il 
 ## Il progetto
 DullNotch è un fork di Boring Notch: app macOS in SwiftUI (minimo macOS 14) che trasforma il notch in un pannello di widget. L'identificativo dell'app è ancora `theboringteam.boringnotch`.
 
-## Stato attuale (8 novembre 2026)
+## Stato attuale (11 novembre 2026)
+**Avanzamento nel notch chiuso** (release 1.5.0): una fonte per volta, in ordine di priorità: timer di Orologio, download, ricarica solo se avanza, quota AI. Tre stili (`wings`, `wire`, `hybrid`), pagina Impostazioni → Progress. Tutto in `components/Notch/NotchProgress.swift`; l'aggancio al notch è in `ContentView` (`progressItem`, `progressWings`, `ProgressLiveActivity`). Dettagli nel Registro, 2026-11-11.
+
 Lumen, Meteo, barra laterale delle Impostazioni e scheda Convert sono nel commit della **release 1.4.0**. Lumen è inclusa e attiva di default, ma per scelta dell'utente non è ancora citata nel README né nelle note di rilascio.
 
 **Lumen**, la mascotte: una falena-lanterna pixel-art (28 × 20) che si muove sopra, sotto e dietro i widget. Attiva di default (`lumenEnabled`), con interruttore nelle impostazioni dei widget.
@@ -39,6 +41,8 @@ Stati della FSM: `hidden`, `asleep`, `waking`, `hovering`, `fallingAsleep`, `per
 - **La FSM è separata dal disegno** e ha `selfCheck` eseguiti in Debug. Fuori dall'app si possono compilare `LumenBrain.swift` e `LumenView.swift` con `swiftc -DDEBUG` e un `main.swift` che li chiama.
 
 ## Trappole
+- **Mai animare l'intero notch su un valore che cambia ogni secondo.** `.animation(.smooth, value: progress.current)` sul layout principale costava il 34% di un core a notch chiuso con un timer in corso; legata alla sola fonte (`current?.source`) scende a 0,7%.
+- **Cartelle dell'utente nella sandbox:** `FileManager.urls(for: .downloadsDirectory)` restituisce la cartella del contenitore, non quella vera, anche con l'entitlement. Il percorso reale si ricava da `getpwuid`.
 - **Misura le prestazioni solo in Release.** In Debug l'app segnava circa il 27% con Lumen spenta e 0,6% in Release: la build Debug mi aveva fatto concludere il contrario del vero.
 - **Build Release locale:** serve `ENABLE_HARDENED_RUNTIME=NO` con firma ad hoc, altrimenti `MediaRemoteAdapter.framework` non si carica e l'app si chiude all'avvio. Il flag è solo da riga di comando, il progetto non è cambiato.
 - **Non usare `CODE_SIGNING_ALLOWED=NO` per lanciare l'app.** Senza entitlements perde il sandbox, quindi non legge le impostazioni dell'utente.
@@ -52,16 +56,16 @@ Stati della FSM: `hidden`, `asleep`, `waking`, `hovering`, `fallingAsleep`, `per
 - **Prove sulla finestra Impostazioni:** una build nuova non ha l'icona nella barra dei menu su macOS 27, quindi va aperta da codice in una copia dei sorgenti. Usa `orderFrontRegardless()`, non `showWindow()`: con il focus la pagina è cambiata da sola tra l'apertura e la cattura (causa non verificata) e una misura è finita su Media. Guarda sempre la cattura, non solo il numero.
 
 ## Lavoro aperto
+- Avanzamento, non provato: download reale da Safari, Chrome e Firefox (provato solo con un `Progress` pubblicato da uno script); ricarica che avanza (la batteria era ferma all'80%); musica attiva con l'interruttore di precedenza acceso e spento; timer in pausa e fine del timer; pagina Progress nelle Impostazioni mai aperta; area sensibile al mouse nello stile Ibrida.
 - Scheda Convert e schede visibili (Registro, 2026-11-08): mai aperte nell'app, da far provare all'utente.
 - Far confermare all'utente la correzione della barra laterale su Widgets (Registro, 2026-11-06): l'istanza in esecuzione è una build precedente.
 - Lumen nel README: rimandata dall'utente (2026-11-08).
-- `/Applications/DullNotch.app` è ancora la Release del 6 novembre, non la 1.4.0.
 - Firma stabile per la posizione: sul Mac non c'è nessuna identità di firma (`security find-identity` ne trova 0). Serve l'Apple ID in Xcode e una scelta dell'utente su dove tenere il Team. Da provare con `MediaRemoteAdapter.framework` e hardened runtime, vedi Trappole.
 - Decidere se Lumen resta attiva di default anche per gli altri utenti.
 - Non ancora visti nell'app reale: "Contro la luce", "Balla", "Legge", "Bussa", risveglio con la musica, risparmio energetico, cambio di widget a mano, Specchio, Calendario, Batteria Bluetooth.
 - Consumo delle nuove mosse non misurato: vedi Registro, misura non riuscita.
-- Consumo con Lumen sveglia ancora alto: circa 14 punti di core in più del notch aperto senza Lumen, soprattutto in WindowServer.
-- Consumo del cielo animato del Meteo mai misurato: in Release restava sulla rotellina.
+- **Cielo animato del Meteo: è il consumo più alto a notch aperto.** Con il Meteo (cielo nuvoloso) app circa 30% e WindowServer circa 30%; senza Meteo e senza Lumen 0,1% e 7%. Vedi Registro, 2026-11-11 "Lumen: cadenza variabile". Da ottimizzare.
+- Lumen sveglia costa ancora circa 6 punti di core nell'app. Idee non provate: ridipingere l'alone sui widget solo quando Lumen si sposta; un solo calcolo per fotogramma tra i due strati; sprite come layer Core Animation.
 
 ## Misure di riferimento
 Build Release, percentuali di un core, Mac in carica, poche letture.
@@ -72,6 +76,15 @@ Build Release, percentuali di un core, Mac in carica, poche letture.
 | Aperto, Lumen spenta | 0,6% | 9,9% |
 | Aperto, Lumen addormentata | 1,8% | 10,9% |
 | Aperto, Lumen sveglia | 9,9% | 23,6% |
+
+Misura dell'11 novembre, senza Meteo (widget Musica e Quote), puntatore mosso da script, 10 letture, una sola prova per riga:
+
+| Stato | DullNotch | WindowServer |
+|---|---|---|
+| Aperto, Lumen spenta | 0,1% | 7,1% |
+| Aperto, Lumen sveglia, 1.4.1 (24 Hz fissi) | 8,7% | 7,8% |
+| Aperto, Lumen sveglia, cadenza variabile | 6,3% | 7,0% |
+| Aperto con Meteo, Lumen sveglia (entrambe le build) | circa 30% | circa 30% |
 
 Confronta solo righe della stessa misura. I watt non sono mai stati misurati: `powermetrics` richiede `sudo`.
 
@@ -179,3 +192,37 @@ Sintomo: entrando in Widgets la barra laterale delle Impostazioni si sposta cont
 ### 2026-11-08 — La "i" delle Notch tabs non mostrava nulla
 - Segnalato dall'utente sulla 1.4.0: `.help()` sull'icona dentro l'etichetta di un `Toggle` in un `Form` non mostra il tooltip. Causa probabile, non verificata: la riga del Form gestisce lei il passaggio del mouse.
 - Sostituito con `HoverInfo` (`SettingsView.swift`): popover aperto con `onHover`, sotto l'icona così non la copre. Build Debug riuscita; confermato funzionante dall'utente. Uscito nella **release 1.4.1** (stessa procedura della 1.4.0, app viva dopo 7 s).
+- `/Applications/DullNotch.app` sostituita con la Release 1.4.1 (prima c'era una 1.3.0): firma valida, app viva dopo 7 s, una sola istanza.
+
+### 2026-11-11 — Avanzamento nel notch chiuso
+Richiesta dell'utente: il notch chiuso mostra da solo ciò che è in corso, con priorità timer, download, ricarica (solo se avanza), quota AI (solo se nient'altro è attivo e il servizio è collegato e aggiornato). Tre stili selezionabili e un interruttore per la precedenza sulla musica.
+- **Timer di Orologio senza Accessibilità.** Sono nelle preferenze `com.apple.mobiletimerd`, `MTTimers.MTTimers[].$MTTimer`. In corso: `MTTimerState` 3 e data di fine in `MTTimerFireTime.$MTTimerDate.MTTimerTimeDate`. Fermo: stato 1 e un intervallo al posto della data. Visto su macOS 27.2.1 con un timer reale. Lo legge l'helper XPC (`clockTimer`), perché il file è fuori dalla sandbox. Formato privato: se Apple lo cambia, il timer non compare. Lo stato "in pausa" non è stato osservato e viene ignorato.
+- **Download:** entitlement `com.apple.security.files.downloads.read-only`, poi `Progress.addSubscriber(forFileURL:)` su ogni file `.download`, `.crdownload`, `.part` in `~/Downloads`. La sottoscrizione sulla **cartella** non consegna nulla; quella sul **singolo file** sì, anche in sandbox. Senza avanzamento pubblicato vale un file parziale scritto negli ultimi 30 s (anello indeterminato).
+- **Ricarica:** `chargingAdvances` chiede un aumento di livello negli ultimi 10 minuti; l'inizio della carica conta come aumento. Con il Mac all'80%, alimentatore collegato e carica ferma non è comparsa, come voluto.
+- **Quota AI:** residuo della finestra di 5 ore, solo con `AIUsageManager.state == .ready` e dato più recente di 10 minuti. Il manager si registra come spettatore di `AIUsageManager`, quindi l'interrogazione ogni 2 minuti resta attiva anche senza widget nel notch. Non sostituisce mai la musica.
+- **Il filo va disegnato fuori dal notch.** La prima versione era una linea di 2 pt sul bordo inferiore, dentro la sagoma: nelle catture si vedeva, sullo schermo no, perché lì c'è l'alloggiamento della fotocamera (segnalato dall'utente). Ora `NotchOutline` traccia lati e fondo del notch spostati all'esterno di metà spessore (3 pt). Le catture non provano che un elemento dentro la sagoma sia visibile.
+- Il filo segue sempre il notch a riposo: centrato, oppure a destra quando l'Ibrida aggiunge l'ala a sinistra. Il timer parte pieno e si svuota (`left / duration`), su richiesta dell'utente; le altre fonti si riempiono.
+- Filo, su richiesta dell'utente: 2 pt, sfumatura dal 30% di opacità all'inizio al colore pieno sulla punta (`gradient`, il punto finale segue `fraction`), alone con `.shadow`, rosso sotto il 15% residuo del timer. Visto in una cattura all'84%; rosso e consumo con l'alone non verificati.
+- Timer fermato a mano: spariva con fino a 5 s di ritardo (segnalato dall'utente), perché lo stato veniva riletto solo dal tick da 5 s. Ora, mentre un timer è in corso, il tick da 1 s rilegge Orologio tramite l'helper. L'avvio di un timer resta legato al tick da 5 s.
+- Un solo tick da 5 s interroga timer e cartella: una novità può comparire con 5 s di ritardo. Il tick da 1 s esiste solo con un timer in corso.
+- **Ibrida:** l'ala è solo a sinistra, quindi il notch è spostato di mezza ala (`progressShift`) e il rettangolo centrale usa la larghezza del notch a riposo (`width - 20`), altrimenti il bordo destro sporge.
+- Provato con catture (argomento `-hideFromScreenRecording '<false/>'`): i tre stili con il timer, quota AI come ripiego, download simulato al 40%, ritorno alla quota AI a download finito. `selfCheck` di priorità e ricarica superati fuori dall'app (estrarre il file fino a `// MARK: - Live sources`).
+- Consumo in Release, notch chiuso, timer in corso, 6 letture: funzione spenta 0,15%, ali 0,68%, filo 0,40%, ibrida 0,47%. Prima della correzione dell'animazione: ali 34%, filo 11%.
+- Deviazione dal piano: un file solo invece di due, e la pagina delle impostazioni è nello stesso file.
+- In esecuzione resta la build Debug di DerivedData; `/Applications/DullNotch.app` è ancora la 1.4.1 senza questa funzione.
+
+### 2026-11-11 — Lumen: cadenza variabile
+Richiesta dell'utente: ridurre il consumo di Lumen con meno fotogrammi e senza orologio a vuoto.
+- `LumenDirector.tick` (pubblicato) sostituisce i 24 Hz fissi: 24 Hz per mosse con copione e volo vero (oltre 30 pt/s, tenuti 0,4 s), 15 Hz ferma a mezz'aria o con polvere in caduta, 8 Hz posata senza polvere, 5 Hz addormentata o fuori scena. La scelta è la funzione pura `LumenDirector.tick(...)`, con `assert` nel `selfCheck`.
+- **Perché 15 e non 12:** il battito d'ali avanza a 15 passi al secondo, quindi a 15 Hz ogni posa delle ali si vede ancora. Perché mai sotto 5 Hz: `frame(at:)` limita `dt` a 0,25 s, oltre il tempo dell'animazione rallenterebbe.
+- **La polvere teneva i 24 Hz quasi sempre:** in volo Lumen ne emette di continuo. Con la regola "effetti = 24 Hz" il risparmio era il 12%. La polvere scende al massimo a 16 pt/s, quindi regge i 15 Hz. La probabilità di emissione era per fotogramma: ora è scalata con `dt`, così la quantità di polvere non cambia con la cadenza.
+- Simulazione di 1 ora con musica, fuori dall'app: 62.823 fotogrammi contro 86.400 (−27%); tempo a 24 Hz 41%, 15 Hz 43%, 8 Hz 10%, 5 Hz 6%. Percorsi e tempi delle mosse non sono stati toccati.
+- Misura in Release: vedi tabella in "Misure di riferimento". App da 8,7% a 6,3%, WindowServer invariato. Una prova sola per build e il comportamento di Lumen è casuale: il dato è indicativo.
+- **Il primo confronto era falso due volte.** Prima il notch della build nuova non si era aperto (app 2,8%): il puntatore era già sopra il notch e non c'è stato l'ingresso. Poi, con entrambe aperte, 30% contro 30,8%: dominava il cielo del Meteo e nascondeva Lumen. Per misurare Lumen togli il Meteo con `-homeWidgets` e fai entrare il puntatore da fuori.
+- Per aprire il notch da script ha funzionato: `CGEvent` di tipo `mouseMoved` in cinque passi da (700, 400) a (756, 8), poi piccoli spostamenti ogni 1,5 s. Controlla sempre con una cattura.
+- Resa visiva a 15 e 8 Hz non valutata dall'utente.
+- Osservato una volta, causa non verificata: dopo molti riavvii ravvicinati il widget AI mostrava "Can't reach Claude".
+
+### 2026-11-11 — Release 1.5.0
+- Contiene l'avanzamento nel notch chiuso e la cadenza variabile di Lumen. `MARKETING_VERSION` 1.4.1 → 1.5.0, stessa procedura della 1.4.0. Prova: versione 1.5.0 nell'Info.plist, MacRemote incluso, `codesign` valido, app viva dopo 8 s.
+- README: riga in What's new / Novità, sezione "Progress on the closed notch" / "Avanzamento nel notch chiuso" con tre catture dell'utente (`docs/progress-wings.png`, `-wire.png`, `-hybrid.png`), una riga in Performance / Prestazioni.

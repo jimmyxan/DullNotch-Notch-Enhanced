@@ -32,6 +32,9 @@ import Foundation
     /// System monitor sensors that need IOKit outside the sandbox: GPU utilization %, average CPU and GPU
     /// die temperature in °C. -1 = not available on this Mac.
     func systemSensors(with reply: @escaping (Double, Double, Double) -> Void)
+    /// Earliest running timer of the macOS Clock app: (fire time as unix seconds, duration in seconds).
+    /// (-1, -1) = none running. Read outside the sandbox from the `com.apple.mobiletimerd` preferences.
+    func clockTimer(with reply: @escaping (Double, Double) -> Void)
 }
 
 /*

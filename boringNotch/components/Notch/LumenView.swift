@@ -740,6 +740,20 @@ final class LumenDirector: ObservableObject {
 
     @Published private(set) var offsets: [String: CGSize] = [:]
     @Published private(set) var isAsleep = false
+    /// How often the canvases need a new frame right now.
+    @Published private(set) var tick: TimeInterval = 1.0 / 24
+    private var fastUntil = 0.0
+
+    /// Scripted moves and real flight keep 24 Hz. Hovering in place drops to 15 Hz, which is the
+    /// wing-flap rate, so every wing frame still shows. Perched uses 8 Hz (wings beat at 7).
+    /// Asleep or off screen there is almost nothing to draw. Dust drifts at 16 pt/s at most, so 15 Hz is
+    /// enough for it. Never above 0.25 s: `frame(at:)` clamps dt there.
+    static func tick(asleep: Bool, visible: Bool, effects: Bool, unscripted: Bool, perched: Bool, flying: Bool) -> TimeInterval {
+        if asleep { return 0.2 }
+        if !visible { return effects ? 1.0 / 15 : 0.2 }
+        if !unscripted || flying { return 1.0 / 24 }
+        return perched && !effects ? 1.0 / 8 : 1.0 / 15
+    }
 
     private var brain = LumenBrain()
     private var segments: [LumenSegment] = []
@@ -789,6 +803,8 @@ final class LumenDirector: ObservableObject {
 
         let pose = currentPose(dt: dt)
         advanceEffects(pose, dt: dt)
+        // Faster than 30 pt/s is flight; hold the fast rate 0.4 s so the tick does not flip at every turn.
+        if dt > 0, hypot(pose.x - current.x, pose.y - current.y) / dt > 30 { fastUntil = now + 0.4 }
         publish(pose)
 
         var frame = LumenFrame()
@@ -909,7 +925,8 @@ final class LumenDirector: ObservableObject {
         var flying = pose.dissolve >= 1 && !pose.noLift && !pose.behind
         if case .fixed(.fold) = pose.wing { flying = false }
         let rate = pose.burst ? 0.6 : flying ? 0.35 : pose.zzz ? 0.02 : 0
-        if motes.count < 60 && Double.random(in: 0..<1) < rate {
+        // `rate` is per frame at 24 Hz: scale it so a slower tick leaves the same amount of dust.
+        if motes.count < 60 && Double.random(in: 0..<1) < rate * dt * 24 {
             let rising = pose.zzz
             motes.append(LumenFrame.Mote(
                 x: pose.x + .random(in: -13...13), y: pose.y - (rising ? 4 : 10),
@@ -956,11 +973,15 @@ final class LumenDirector: ObservableObject {
         var next: [String: CGSize] = [:]
         if let id = pose.pushedCard { next[id] = pose.push }
         let asleep = phaseShown == .asleep
-        guard next != offsets || asleep != isAsleep else { return }
+        let tick = Self.tick(
+            asleep: asleep, visible: pose.isVisible, effects: !motes.isEmpty || !rings.isEmpty,
+            unscripted: isUnscripted, perched: pose.noLift, flying: clock < fastUntil)
+        guard next != offsets || asleep != isAsleep || tick != self.tick else { return }
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             if self.offsets != next { self.offsets = next }
             if self.isAsleep != asleep { self.isAsleep = asleep }
+            if self.tick != tick { self.tick = tick }
         }
     }
 }
@@ -971,6 +992,19 @@ extension LumenDirector {
 
     /// A layout change must end the current move, and never leave Lumen stuck in it.
     static func selfCheck() {
+        func hz(_ asleep: Bool, _ visible: Bool, _ effects: Bool, _ unscripted: Bool, _ perched: Bool, _ flying: Bool) -> Int {
+            Int((1 / tick(asleep: asleep, visible: visible, effects: effects, unscripted: unscripted, perched: perched, flying: flying)).rounded())
+        }
+        assert(hz(true, true, true, false, false, false) == 5, "asleep")
+        assert(hz(false, false, false, true, false, false) == 5, "away, nothing to draw")
+        assert(hz(false, false, true, true, false, false) == 15, "away but dust still falling")
+        assert(hz(false, true, false, false, false, false) == 24, "scripted move keeps its timing")
+        assert(hz(false, true, false, true, false, true) == 24, "flying")
+        assert(hz(false, true, false, true, false, false) == 15, "hovering in place")
+        assert(hz(false, true, false, true, true, false) == 8, "perched")
+        assert(hz(false, true, true, true, true, false) == 15, "perched, dust still falling")
+        assert(hz(false, true, true, true, false, false) == 15, "hovering with its dust")
+
         let director = LumenDirector()
         var cards = [
             LumenCard(id: "m", kind: .music, rect: CGRect(x: 0, y: 40, width: 330, height: 126)),
@@ -1162,8 +1196,7 @@ struct LumenLayerView: View {
     @ObservedObject private var director = LumenDirector.shared
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    /// Sleep barely changes from frame to frame.
-    private var interval: TimeInterval { director.isAsleep ? 0.2 : 1.0 / 24 }
+    private var interval: TimeInterval { director.tick }
 
     var body: some View {
         let frame = director.frame(at: clock.now, cards: cards, inputs: inputs())

@@ -21,6 +21,7 @@ struct ContentView: View {
     @ObservedObject var coordinator = BoringViewCoordinator.shared
     @ObservedObject var musicManager = MusicManager.shared
     @ObservedObject var batteryModel = BatteryStatusViewModel.shared
+    @ObservedObject var progress = NotchProgressManager.shared
     @ObservedObject var brightnessManager = BrightnessManager.shared
     @ObservedObject var volumeManager = VolumeManager.shared
     @State private var hoverTask: Task<Void, Never>?
@@ -37,6 +38,38 @@ struct ContentView: View {
 
     @Default(.showNotHumanFace) var showNotHumanFace
     @Default(.homeWidgets) var homeWidgets
+    @Default(.progressStyle) var progressStyle
+    @Default(.progressOverridesMusic) var progressOverridesMusic
+
+    private var musicOnClosedNotch: Bool {
+        (musicManager.isPlaying || !musicManager.isPlayerIdle) && coordinator.musicLiveActivityEnabled
+    }
+
+    /// Progress to draw on the closed notch, in any style.
+    private var progressItem: ProgressItem? {
+        guard vm.notchState == .closed, !vm.hideOnClosed, !coordinator.helloAnimationRunning else { return nil }
+        return progress.current
+    }
+
+    /// Progress that takes the wings. Music keeps them when the setting says so; the AI quota never takes them from music.
+    private var progressWings: ProgressItem? {
+        guard let item = progressItem, progressStyle != .wire,
+              !(coordinator.expandingView.show && coordinator.expandingView.type == .battery) else { return nil }
+        if musicOnClosedNotch && (item.source == .aiQuota || !progressOverridesMusic) { return nil }
+        return item
+    }
+
+    /// Side of one wing. A timer needs room for "34:04"; Hybrid keeps its icon clear of the wire.
+    private func progressWingWidth(_ item: ProgressItem) -> CGFloat {
+        if progressStyle == .hybrid { return vm.effectiveClosedNotchHeight - 12 + 6 }
+        return max(item.source == .timer ? 36 : 0, vm.effectiveClosedNotchHeight - 12)
+    }
+
+    /// Hybrid has a wing only on the left: shift the notch so its middle stays on the camera.
+    private var progressShift: CGFloat {
+        guard let item = progressWings, progressStyle == .hybrid else { return 0 }
+        return -(progressWingWidth(item) + 8) / 2
+    }
 
     /// Open width: home follows its widgets, the other tabs keep the classic size.
     private var openNotchWidth: CGFloat {
@@ -73,6 +106,8 @@ struct ContentView: View {
             && vm.notchState == .closed && Defaults[.showPowerStatusNotifications]
         {
             chinWidth = 640
+        } else if let item = progressWings {
+            chinWidth += (progressStyle == .hybrid ? 1 : 2) * progressWingWidth(item) + 20
         } else if (!coordinator.expandingView.show || coordinator.expandingView.type == .music)
             && vm.notchState == .closed && (musicManager.isPlaying || !musicManager.isPlayerIdle)
             && coordinator.musicLiveActivityEnabled && !vm.hideOnClosed
@@ -136,7 +171,22 @@ struct ContentView: View {
                         width: vm.notchState == .open ? openNotchWidth : nil,
                         height: vm.notchState == .open ? vm.notchSize.height : nil
                     )
+                    // The wire hugs the notch itself: centred, or on the right when Hybrid adds its wing on the left.
+                    .overlay(alignment: progressShift == 0 ? .top : .topTrailing) {
+                        if let item = progressItem, progressStyle != .wings {
+                            NotchProgressWire(item: item)
+                                .frame(
+                                    width: vm.closedNotchSize.width - 20 + 2 * cornerRadiusInsets.closed.bottom,
+                                    height: vm.effectiveClosedNotchHeight
+                                )
+                                .transition(.opacity)
+                        }
+                    }
+                    .offset(x: progressShift)
                     .animation(animationSpring, value: openNotchWidth)
+                    // Animate on a change of source only: animating every countdown second cost 34% of a core.
+                    .animation(.smooth, value: progress.current?.source)
+                    .animation(.smooth, value: progressStyle)
                     .conditionalModifier(true) { view in
                         let openAnimation = Animation.spring(response: 0.42, dampingFraction: 0.8, blendDuration: 0)
                         let closeAnimation = Animation.spring(response: 0.45, dampingFraction: 1.0, blendDuration: 0)
@@ -305,6 +355,9 @@ struct ContentView: View {
                       } else if coordinator.sneakPeek.show && Defaults[.inlineHUD] && (coordinator.sneakPeek.type != .music) && (coordinator.sneakPeek.type != .battery) && vm.notchState == .closed {
                           InlineHUD(type: $coordinator.sneakPeek.type, value: $coordinator.sneakPeek.value, icon: $coordinator.sneakPeek.icon, hoverAnimation: $isHovering, gestureProgress: $gestureProgress)
                               .transition(.opacity)
+                      } else if let item = progressWings {
+                          ProgressLiveActivity(item)
+                              .transition(.opacity)
                       } else if (!coordinator.expandingView.show || coordinator.expandingView.type == .music) && vm.notchState == .closed && (musicManager.isPlaying || !musicManager.isPlayerIdle) && coordinator.musicLiveActivityEnabled && !vm.hideOnClosed {
                           MusicLiveActivity()
                               .frame(alignment: .center)
@@ -418,6 +471,26 @@ struct ContentView: View {
             height: vm.effectiveClosedNotchHeight,
             alignment: .center
         )
+    }
+
+    /// Same skeleton as the music activity: wing, black middle over the camera, wing.
+    @ViewBuilder
+    func ProgressLiveActivity(_ item: ProgressItem) -> some View {
+        let side = max(0, vm.effectiveClosedNotchHeight - 12)
+        HStack {
+            NotchProgressIcon(item: item)
+                .frame(width: side, height: side)
+                .frame(width: progressWingWidth(item), alignment: progressStyle == .hybrid ? .leading : .center)
+            Rectangle()
+                .fill(.black)
+                // Hybrid keeps the idle notch's middle (width - 20) so `progressShift` centres it exactly.
+                .frame(width: vm.closedNotchSize.width - (progressStyle == .hybrid ? 20 : cornerRadiusInsets.closed.top))
+            if progressStyle == .wings {
+                NotchProgressValue(item: item)
+                    .frame(width: progressWingWidth(item), height: side)
+            }
+        }
+        .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
     }
 
     @ViewBuilder

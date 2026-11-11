@@ -315,6 +315,19 @@ extension XPCHelperClient {
             return (-1, nil)
         }
     }
+
+    /// Earliest running Clock timer: when it fires and its full duration. nil = none.
+    nonisolated func clockTimer() async -> (fires: Date, duration: TimeInterval)? {
+        do {
+            let service = await MainActor.run { ensureRemoteService() }
+            let (fire, duration): (Double, Double) = try await service.withContinuation { service, continuation in
+                service.clockTimer { continuation.resume(returning: ($0, $1)) }
+            }
+            return duration > 0 ? (Date(timeIntervalSince1970: fire), duration) : nil
+        } catch {
+            return nil
+        }
+    }
 }
 
 extension Notification.Name {

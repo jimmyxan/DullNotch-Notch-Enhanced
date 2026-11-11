@@ -45,6 +45,9 @@ struct SettingsView: View {
                 NavigationLink(value: "HUD") {
                     Label("HUDs", systemImage: "dial.medium.fill")
                 }
+                NavigationLink(value: "Progress") {
+                    Label("Progress", systemImage: "chart.bar.fill")
+                }
                 NavigationLink(value: "Battery") {
                     Label("Battery", systemImage: "battery.100.bolt")
                 }
@@ -86,6 +89,8 @@ struct SettingsView: View {
                     CalendarSettings()
                 case "HUD":
                     HUD()
+                case "Progress":
+                    ProgressSettings()
                 case "Battery":
                     Charge()
                 case "Shelf":
