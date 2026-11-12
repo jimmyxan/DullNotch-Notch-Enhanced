@@ -189,6 +189,8 @@ Timers are read from the Clock app's own data, with no extra permission. This re
 
 ### Claude Code on the closed notch
 
+<p align="center"><img src="docs/claude-code.gif" alt="Closed notch with Claude's orange pixel mascot hammering while Claude Code works, then hopping with its arms up when it finishes" width="100%"></p>
+
 While Claude Code works, Claude's pixel mascot sits on the closed notch and hammers on a block or types on a keyboard, picked at random each turn. When Claude finishes it hops with its arms up or sips a coffee for 20 seconds, then disappears. While Claude waits for you (a question, a permission) nothing is shown, and pressing Esc hides the mascot within a few seconds.
 
 To connect it, open **Settings → Progress → Claude Code** and click **Connect Claude Code**. DullNotch adds a few hooks to `~/.claude/settings.json`, keeps your other hooks, and saves a backup next to the file; **Disconnect** removes them. Nothing else to install.
@@ -388,6 +390,8 @@ In **Impostazioni → Progress** scegli lo stile, accendi o spegni ogni fonte e 
 I timer sono letti dai dati dell'app Orologio, senza permessi aggiuntivi. Il formato non è documentato da Apple, quindi un aggiornamento di macOS può interromperne il funzionamento. Un timer o un download nuovo può comparire con fino a 5 secondi di ritardo.
 
 ### Claude Code nel notch chiuso
+
+<p align="center"><img src="docs/claude-code.gif" alt="Notch chiuso con la mascotte pixel arancione di Claude che martella mentre Claude Code lavora, poi saltella a braccia alzate quando ha finito" width="100%"></p>
 
 Mentre Claude Code lavora, la mascotte pixel di Claude compare nel notch chiuso e martella un blocco o batte sulla tastiera, scelti a caso a ogni turno. Quando Claude finisce saltella con le braccia in alto o beve un caffè per 20 secondi, poi sparisce. Mentre Claude aspetta te (una domanda, un permesso) non si vede nulla, e premendo Esc la mascotte sparisce in pochi secondi.
 
