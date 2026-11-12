@@ -295,4 +295,5 @@ Richiesta dell'utente: risolvere la mascotte che restava in "working" dopo un Es
   - `codesign` valido; app viva dopo 8 s, un'istanza.
   - Mascotte al lavoro: 1,70% di un core in Release.
 - **README**: riga in What's new / Novità, sezione "Claude Code on the closed notch" / "Claude Code nel notch chiuso", una riga in Performance / Prestazioni. Senza immagini.
-- In esecuzione la Release della 1.6.0 dallo scratchpad. `/Applications/DullNotch.app` è ancora la 1.5.0.
+- `/Applications/DullNotch.app` sostituita con la 1.6.0, estratta dallo zip della release: firma valida, app viva dopo 8 s, un'istanza, mascotte visibile.
+- README: `docs/claude-code.gif` (934 × 216, 12 fps, 202 fotogrammi, 358 KB) ricavata dal video dell'utente `mergedVIDEO.mp4`. Il video non è nel repo (non tracciato). La GIF è fatta con uno script Swift (AVAssetImageGenerator + ImageIO) nello scratchpad, come quella di Convert.
