@@ -491,6 +491,8 @@ struct ProgressSettings: View {
                 Text("Only one is shown at a time. The first one in progress wins, in this order.")
             }
             .disabled(!enabled)
+
+            ClaudeAgentSettingsSection()
         }
         .accentColor(.effectiveAccent)
         .navigationTitle("Progress")

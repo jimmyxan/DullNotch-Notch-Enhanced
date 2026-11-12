@@ -22,6 +22,7 @@ struct ContentView: View {
     @ObservedObject var musicManager = MusicManager.shared
     @ObservedObject var batteryModel = BatteryStatusViewModel.shared
     @ObservedObject var progress = NotchProgressManager.shared
+    @ObservedObject var agent = ClaudeAgentStatus.shared
     @ObservedObject var brightnessManager = BrightnessManager.shared
     @ObservedObject var volumeManager = VolumeManager.shared
     @State private var hoverTask: Task<Void, Never>?
@@ -40,6 +41,7 @@ struct ContentView: View {
     @Default(.homeWidgets) var homeWidgets
     @Default(.progressStyle) var progressStyle
     @Default(.progressOverridesMusic) var progressOverridesMusic
+    @Default(.claudeAgentEnabled) var claudeAgentEnabled
 
     private var musicOnClosedNotch: Bool {
         (musicManager.isPlaying || !musicManager.isPlayerIdle) && coordinator.musicLiveActivityEnabled
@@ -59,6 +61,25 @@ struct ContentView: View {
         return item
     }
 
+    /// Claude's mascot is on the closed notch: working, or just finished.
+    private var agentVisible: Bool {
+        claudeAgentEnabled && agent.phase != .hidden
+            && vm.notchState == .closed && !vm.hideOnClosed && !coordinator.helloAnimationRunning
+    }
+
+    /// Nothing else holds a wing: the mascot gets the left one, Hybrid-style.
+    private var agentAlone: Bool {
+        agentVisible && progressWings == nil && !musicOnClosedNotch
+            && !(coordinator.expandingView.show && coordinator.expandingView.type == .battery)
+    }
+
+    private var inlineHUDShowing: Bool {
+        coordinator.sneakPeek.show && Defaults[.inlineHUD] && coordinator.sneakPeek.type != .music
+            && coordinator.sneakPeek.type != .battery && vm.notchState == .closed
+    }
+
+    private var agentWingWidth: CGFloat { vm.effectiveClosedNotchHeight - 12 + 6 }
+
     /// Side of one wing. A timer needs room for "34:04"; Hybrid keeps its icon clear of the wire.
     private func progressWingWidth(_ item: ProgressItem) -> CGFloat {
         if progressStyle == .hybrid { return vm.effectiveClosedNotchHeight - 12 + 6 }
@@ -66,8 +87,11 @@ struct ContentView: View {
     }
 
     /// Hybrid has a wing only on the left: shift the notch so its middle stays on the camera.
+    /// With the mascot on the right Hybrid is symmetric again and needs no shift.
     private var progressShift: CGFloat {
-        guard let item = progressWings, progressStyle == .hybrid else { return 0 }
+        if inlineHUDShowing { return 0 } // the HUD takes the whole closed notch, no wing to balance
+        if agentAlone { return -(agentWingWidth + 8) / 2 }
+        guard let item = progressWings, progressStyle == .hybrid, !agentVisible else { return 0 }
         return -(progressWingWidth(item) + 8) / 2
     }
 
@@ -107,7 +131,9 @@ struct ContentView: View {
         {
             chinWidth = 640
         } else if let item = progressWings {
-            chinWidth += (progressStyle == .hybrid ? 1 : 2) * progressWingWidth(item) + 20
+            chinWidth += (progressStyle == .hybrid && !agentVisible ? 1 : 2) * progressWingWidth(item) + 20
+        } else if agentAlone {
+            chinWidth += agentWingWidth + 20
         } else if (!coordinator.expandingView.show || coordinator.expandingView.type == .music)
             && vm.notchState == .closed && (musicManager.isPlaying || !musicManager.isPlayerIdle)
             && coordinator.musicLiveActivityEnabled && !vm.hideOnClosed
@@ -186,6 +212,7 @@ struct ContentView: View {
                     .animation(animationSpring, value: openNotchWidth)
                     // Animate on a change of source only: animating every countdown second cost 34% of a core.
                     .animation(.smooth, value: progress.current?.source)
+                    .animation(.smooth, value: agentVisible)
                     .animation(.smooth, value: progressStyle)
                     .conditionalModifier(true) { view in
                         let openAnimation = Animation.spring(response: 0.42, dampingFraction: 0.8, blendDuration: 0)
@@ -358,6 +385,9 @@ struct ContentView: View {
                       } else if let item = progressWings {
                           ProgressLiveActivity(item)
                               .transition(.opacity)
+                      } else if agentAlone {
+                          AgentLiveActivity()
+                              .transition(.opacity)
                       } else if (!coordinator.expandingView.show || coordinator.expandingView.type == .music) && vm.notchState == .closed && (musicManager.isPlaying || !musicManager.isPlayerIdle) && coordinator.musicLiveActivityEnabled && !vm.hideOnClosed {
                           MusicLiveActivity()
                               .frame(alignment: .center)
@@ -478,7 +508,14 @@ struct ContentView: View {
     func ProgressLiveActivity(_ item: ProgressItem) -> some View {
         let side = max(0, vm.effectiveClosedNotchHeight - 12)
         HStack {
-            NotchProgressIcon(item: item)
+            Group {
+                // Wings: the mascot takes the icon's place. Hybrid: it takes the free right wing.
+                if agentVisible && progressStyle == .wings {
+                    ClaudeMascotView(phase: agent.phase)
+                } else {
+                    NotchProgressIcon(item: item)
+                }
+            }
                 .frame(width: side, height: side)
                 .frame(width: progressWingWidth(item), alignment: progressStyle == .hybrid ? .leading : .center)
             Rectangle()
@@ -488,7 +525,26 @@ struct ContentView: View {
             if progressStyle == .wings {
                 NotchProgressValue(item: item)
                     .frame(width: progressWingWidth(item), height: side)
+            } else if agentVisible {
+                ClaudeMascotView(phase: agent.phase)
+                    .frame(width: side, height: side)
+                    .frame(width: progressWingWidth(item), alignment: .trailing)
             }
+        }
+        .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
+    }
+
+    /// Hybrid's skeleton with the mascot in the icon's wing.
+    @ViewBuilder
+    func AgentLiveActivity() -> some View {
+        let side = max(0, vm.effectiveClosedNotchHeight - 12)
+        HStack {
+            ClaudeMascotView(phase: agent.phase)
+                .frame(width: side, height: side)
+                .frame(width: agentWingWidth, alignment: .leading)
+            Rectangle()
+                .fill(.black)
+                .frame(width: vm.closedNotchSize.width - 20)
         }
         .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
     }
@@ -496,14 +552,20 @@ struct ContentView: View {
     @ViewBuilder
     func MusicLiveActivity() -> some View {
         HStack {
-            Image(nsImage: musicManager.albumArt)
-                .resizable()
-                .clipped()
-                .clipShape(
-                    RoundedRectangle(
-                        cornerRadius: MusicPlayerImageSizes.cornerRadiusInset.closed)
-                )
-                .matchedGeometryEffect(id: "albumArt", in: albumArtNamespace)
+            Group {
+                if agentVisible {
+                    ClaudeMascotView(phase: agent.phase)
+                } else {
+                    Image(nsImage: musicManager.albumArt)
+                        .resizable()
+                        .clipped()
+                        .clipShape(
+                            RoundedRectangle(
+                                cornerRadius: MusicPlayerImageSizes.cornerRadiusInset.closed)
+                        )
+                        .matchedGeometryEffect(id: "albumArt", in: albumArtNamespace)
+                }
+            }
                 .frame(
                     width: max(0, vm.effectiveClosedNotchHeight - 12),
                     height: max(0, vm.effectiveClosedNotchHeight - 12)

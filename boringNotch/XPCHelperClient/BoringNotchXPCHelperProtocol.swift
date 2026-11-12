@@ -35,5 +35,10 @@ import Foundation
     /// Earliest running timer of the macOS Clock app: (fire time as unix seconds, duration in seconds).
     /// (-1, -1) = none running. Read outside the sandbox from the `com.apple.mobiletimerd` preferences.
     func clockTimer(with reply: @escaping (Double, Double) -> Void)
+    /// Claude Code hooks in ~/.claude/settings.json. action: "status", "install" or "remove".
+    /// Reply: 1 connected, 0 not connected, -1 no ~/.claude, -2 settings.json is not valid JSON, -3 write failed.
+    func claudeHooks(_ action: String, with reply: @escaping (Int) -> Void)
+    /// Claude Code sessions running a turn right now (~/.claude/sessions). -1 = this Claude Code doesn't keep that folder.
+    func claudeBusySessions(with reply: @escaping (Int) -> Void)
 }
 

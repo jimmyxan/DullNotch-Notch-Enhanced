@@ -321,6 +321,79 @@ extension BoringNotchXPCHelper {
     }
 }
 
+// MARK: - Claude Code
+
+extension BoringNotchXPCHelper {
+    private static let claudeDir = NSHomeDirectory() + "/.claude"
+    private static let hookMark = "dullnotch.agent."
+    /// Event → state posted to the app (`ClaudeAgentStatus`).
+    private static let hookEvents: [(event: String, state: String, matcher: String?)] = [
+        ("UserPromptSubmit", "working", nil), ("PreToolUse", "working", "*"), ("PostToolUse", "working", "*"),
+        ("Stop", "done", nil), ("Notification", "idle", nil), ("SessionEnd", "idle", nil),
+    ]
+
+    @objc func claudeHooks(_ action: String, with reply: @escaping (Int) -> Void) {
+        var isDir: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: Self.claudeDir, isDirectory: &isDir), isDir.boolValue else { return reply(-1) }
+        // Follow a symlink (dotfiles setups) so the atomic write replaces the real file, not the link.
+        let url = URL(fileURLWithPath: Self.claudeDir + "/settings.json").resolvingSymlinksInPath()
+        var settings: [String: Any] = [:]
+        if let data = FileManager.default.contents(atPath: url.path), !data.isEmpty {
+            guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return reply(-2) }
+            settings = json
+        }
+        let hooks = settings["hooks"] as? [String: Any] ?? [:]
+
+        func isOurs(_ entry: Any) -> Bool {
+            ((entry as? [String: Any])?["hooks"] as? [[String: Any]] ?? [])
+                .contains { ($0["command"] as? String)?.contains(Self.hookMark) == true }
+        }
+        let installed = Self.hookEvents.allSatisfy { (hooks[$0.event] as? [Any] ?? []).contains(where: isOurs) }
+        if action == "status" { return reply(installed ? 1 : 0) }
+
+        // Drop every entry of ours (also hand-made ones), then add the current set when installing.
+        var updated = hooks.compactMapValues { value -> Any? in
+            guard let list = value as? [Any] else { return value }
+            let kept = list.filter { !isOurs($0) }
+            return kept.isEmpty ? nil : kept
+        }
+        if action == "install" {
+            for h in Self.hookEvents {
+                var entry: [String: Any] = ["hooks": [["type": "command", "command": "/usr/bin/notifyutil -p \(Self.hookMark)\(h.state)"]]]
+                if let matcher = h.matcher { entry["matcher"] = matcher }
+                updated[h.event] = (updated[h.event] as? [Any] ?? []) + [entry]
+            }
+        }
+        if updated.isEmpty { settings["hooks"] = nil } else { settings["hooks"] = updated }
+
+        let backup = url.path + ".dullnotch-backup"
+        if !FileManager.default.fileExists(atPath: backup), FileManager.default.fileExists(atPath: url.path) {
+            try? FileManager.default.copyItem(atPath: url.path, toPath: backup)
+        }
+        guard let out = try? JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]),
+              (try? (out + Data("\n".utf8)).write(to: url, options: .atomic)) != nil else { return reply(-3) }
+        reply(action == "install" ? 1 : 0)
+    }
+
+    /// Claude Code keeps one file per running session, ~/.claude/sessions/<pid>.json, whose "status" it
+    /// sets itself: "idle" between turns, something else while one runs. Esc fires no hook and, before any output,
+    /// leaves no trace in the transcript, but it does turn the session idle.
+    @objc func claudeBusySessions(with reply: @escaping (Int) -> Void) {
+        let dir = URL(fileURLWithPath: Self.claudeDir + "/sessions")
+        guard let files = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return reply(-1) }
+        let busy = files.filter { url in
+            guard url.pathExtension == "json",
+                  let data = FileManager.default.contents(atPath: url.path),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  // Seen: "busy", "shell" (running a command), "waiting" (dialog open), "idle". Anything but idle is a turn in progress.
+                  let status = json["status"] as? String, status != "idle",
+                  let pid = (json["pid"] as? NSNumber)?.int32Value else { return false }
+            return kill(pid, 0) == 0 // a session that crashed leaves its file behind
+        }
+        reply(busy.count)
+    }
+}
+
 // MARK: - System sensors
 
 extension BoringNotchXPCHelper {

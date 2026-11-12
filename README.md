@@ -91,6 +91,7 @@ When a new version is published on GitHub, DullNotch tells you: **Update Now** o
 | **Convert** | A new notch tab that converts images and text documents, PDF included, without uploading anything. Drag a file over the notch and pick the format. See below. |
 | **Notch tabs** | Choose which tabs appear in the notch, each with a short description on hover. |
 | **Progress on the closed notch** | The closed notch shows what is in progress: a Clock timer, a download, charging, or what is left of your AI plan. One at a time, by priority, in three styles. See below. |
+| **Claude Code on the closed notch** | Claude's mascot hammers or types while Claude Code works, then celebrates or takes a coffee break for 20 seconds when it finishes. One click to connect. See below. |
 | **System monitor** | CPU, memory, GPU, CPU and GPU temperature: pick one or two, each with a live graph of the last 2 minutes. |
 | **AI usage** | Your Claude or Codex plan limits at a glance: 5-hour and weekly windows as concentric rings. |
 | **Update notice** | A new GitHub release is announced in the app: update now or get a reminder tomorrow. |
@@ -186,11 +187,20 @@ In **Settings → Progress** you pick the style, turn each source on or off, and
 
 Timers are read from the Clock app's own data, with no extra permission. This relies on a format Apple does not document, so a macOS update may break it. A new timer or download can take up to 5 seconds to appear.
 
+### Claude Code on the closed notch
+
+While Claude Code works, Claude's pixel mascot sits on the closed notch and hammers on a block or types on a keyboard, picked at random each turn. When Claude finishes it hops with its arms up or sips a coffee for 20 seconds, then disappears. While Claude waits for you (a question, a permission) nothing is shown, and pressing Esc hides the mascot within a few seconds.
+
+To connect it, open **Settings → Progress → Claude Code** and click **Connect Claude Code**. DullNotch adds a few hooks to `~/.claude/settings.json`, keeps your other hooks, and saves a backup next to the file; **Disconnect** removes them. Nothing else to install.
+
+The mascot follows the other closed-notch views: with **Wings** it takes the icon's place on the left, with **Hybrid** it takes the right wing, with **Wire** or with nothing else going on it gets a wing on the left, and with music it takes the album art's place.
+
 ### Performance
 
 - The glass is composited by WindowServer: no screen capture and no per-frame CPU work. It exists only while the notch is open and the slider is above 0%.
 - The Mixer polls once per second only while its tab is visible, every 3 s while a custom volume is active, and not at all otherwise.
 - Progress on the closed notch checks the Clock timers and the Downloads folder every 5 s, and once per second only while a timer runs. With a timer running it used well under 1% of one CPU core in our measurements.
+- Claude's mascot draws 6 frames a second only while it is on screen: about 2% of one CPU core. While Claude works, the session status is read every 2 s; when the mascot is hidden nothing runs.
 - With Spotify closed, Last.fm is checked every 15 s while music plays and every 60 s when idle. Spotify is never launched in the background.
 
 ### Spotify on other devices with Last.fm (tutorial)
@@ -283,6 +293,7 @@ Quando su GitHub esce una nuova versione, DullNotch te lo dice: **Update Now** a
 | **Converti** | Una nuova tab del notch che converte immagini e documenti di testo, PDF compresi, senza caricare nulla online. Trascina un file sul notch e scegli il formato. Vedi sotto. |
 | **Tab del notch** | Scegli quali tab mostrare nel notch; ognuna ha una breve descrizione al passaggio del mouse. |
 | **Avanzamento nel notch chiuso** | Il notch chiuso mostra ciò che è in corso: un timer di Orologio, un download, la ricarica o quanto resta del piano AI. Uno alla volta, per priorità, in tre stili. Vedi sotto. |
+| **Claude Code nel notch chiuso** | La mascotte di Claude martella o batte sulla tastiera mentre Claude Code lavora, poi festeggia o si prende un caffè per 20 secondi quando ha finito. Si collega con un clic. Vedi sotto. |
 | **Monitor di sistema** | CPU, memoria, GPU, temperatura di CPU e GPU: scegline uno o due, ciascuno con un grafico dal vivo degli ultimi 2 minuti. |
 | **Utilizzo AI** | I limiti del tuo piano Claude o Codex a colpo d'occhio: finestra di 5 ore e settimanale come anelli concentrici. |
 | **Avviso aggiornamenti** | Una nuova release su GitHub viene segnalata nell'app: aggiorna subito o ricevi un promemoria il giorno dopo. |
@@ -376,11 +387,20 @@ In **Impostazioni → Progress** scegli lo stile, accendi o spegni ogni fonte e 
 
 I timer sono letti dai dati dell'app Orologio, senza permessi aggiuntivi. Il formato non è documentato da Apple, quindi un aggiornamento di macOS può interromperne il funzionamento. Un timer o un download nuovo può comparire con fino a 5 secondi di ritardo.
 
+### Claude Code nel notch chiuso
+
+Mentre Claude Code lavora, la mascotte pixel di Claude compare nel notch chiuso e martella un blocco o batte sulla tastiera, scelti a caso a ogni turno. Quando Claude finisce saltella con le braccia in alto o beve un caffè per 20 secondi, poi sparisce. Mentre Claude aspetta te (una domanda, un permesso) non si vede nulla, e premendo Esc la mascotte sparisce in pochi secondi.
+
+Per collegarla apri **Impostazioni → Progress → Claude Code** e premi **Connect Claude Code**. DullNotch aggiunge alcuni hook a `~/.claude/settings.json`, lascia gli altri e salva una copia accanto al file; **Disconnect** li toglie. Non c'è altro da installare.
+
+La mascotte segue le altre viste del notch chiuso: con **Wings** prende il posto dell'icona a sinistra, con **Hybrid** l'ala destra, con **Wire** o quando non c'è altro un'ala a sinistra, con la musica il posto della copertina.
+
 ### Prestazioni
 
 - Il vetro è composto da WindowServer: nessuna cattura dello schermo e nessun lavoro della CPU a ogni frame. Esiste solo a notch aperto e con lo slider sopra lo 0%.
 - Il Mixer si aggiorna una volta al secondo solo con la sua tab visibile, ogni 3 s se c'è un volume personalizzato attivo, altrimenti mai.
 - L'avanzamento nel notch chiuso controlla i timer di Orologio e la cartella Download ogni 5 s, e una volta al secondo solo mentre un timer è in corso. Con un timer in corso ha usato ben meno dell'1% di un core nelle nostre misure.
+- La mascotte di Claude disegna 6 fotogrammi al secondo solo mentre è visibile: circa il 2% di un core. Mentre Claude lavora, lo stato della sessione viene letto ogni 2 s; a mascotte nascosta non gira nulla.
 - Con Spotify chiuso, Last.fm viene controllato ogni 15 s durante l'ascolto e ogni 60 s quando non suona nulla. Spotify non viene mai avviato in background.
 
 ### Spotify su altri dispositivi con Last.fm (tutorial)

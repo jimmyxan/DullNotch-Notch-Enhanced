@@ -328,6 +328,30 @@ extension XPCHelperClient {
             return nil
         }
     }
+
+    /// Claude Code hooks: "status", "install" or "remove". See the protocol for the codes; -3 also when the helper fails.
+    nonisolated func claudeHooks(_ action: String) async -> Int {
+        do {
+            let service = await MainActor.run { ensureRemoteService() }
+            return try await service.withContinuation { service, continuation in
+                service.claudeHooks(action) { continuation.resume(returning: $0) }
+            }
+        } catch {
+            return -3
+        }
+    }
+
+    /// Sessions busy right now; -1 = unknown (older Claude Code, or the helper failed).
+    nonisolated func claudeBusySessions() async -> Int {
+        do {
+            let service = await MainActor.run { ensureRemoteService() }
+            return try await service.withContinuation { service, continuation in
+                service.claudeBusySessions { continuation.resume(returning: $0) }
+            }
+        } catch {
+            return -1
+        }
+    }
 }
 
 extension Notification.Name {

@@ -12,7 +12,9 @@ Memoria di progetto per le sessioni AI. Leggi questo file prima di esplorare il 
 ## Il progetto
 DullNotch è un fork di Boring Notch: app macOS in SwiftUI (minimo macOS 14) che trasforma il notch in un pannello di widget. L'identificativo dell'app è ancora `theboringteam.boringnotch`.
 
-## Stato attuale (11 novembre 2026)
+## Stato attuale (12 novembre 2026)
+**Claude Code nel notch chiuso** (release 1.6.0): la mascotte di Claude batte sulla tastiera mentre Claude lavora, festeggia per 20 s quando finisce e resta nascosta mentre aspetta. Codice in `components/Notch/ClaudeAgentStatus.swift`, posizione nelle viste in `ContentView` (`agentVisible`, `agentAlone`). Gli hook li installa l'helper XPC con il pulsante "Connect Claude Code" in Impostazioni → Progress. Sempre l'helper rileva l'interruzione con Esc, leggendo lo stato delle sessioni in `~/.claude/sessions`. Dettagli nel Registro, 2026-11-12.
+
 **Avanzamento nel notch chiuso** (release 1.5.0): una fonte per volta, in ordine di priorità: timer di Orologio, download, ricarica solo se avanza, quota AI. Tre stili (`wings`, `wire`, `hybrid`), pagina Impostazioni → Progress. Tutto in `components/Notch/NotchProgress.swift`; l'aggancio al notch è in `ContentView` (`progressItem`, `progressWings`, `ProgressLiveActivity`). Dettagli nel Registro, 2026-11-11.
 
 Lumen, Meteo, barra laterale delle Impostazioni e scheda Convert sono nel commit della **release 1.4.0**. Lumen è inclusa e attiva di default, ma per scelta dell'utente non è ancora citata nel README né nelle note di rilascio.
@@ -52,10 +54,12 @@ Stati della FSM: `hidden`, `asleep`, `waking`, `hovering`, `fallingAsleep`, `per
 - **Nuovi file Swift:** `boringNotch/components/Notch` non è una cartella sincronizzata, quindi vanno aggiunti a mano a `project.pbxproj` in quattro punti.
 - **Permesso posizione e firma ad hoc:** il permesso è registrato sul `cdhash` della build. Build diverse non hanno lo stesso hash, quindi prima di dare la colpa al codice controlla la voce in `/var/db/locationd/clients.plist`.
 - **Misure automatiche a notch aperto:** `hideFromScreenRecording` può nascondere il notch dagli screenshot, quindi una cattura non prova che sia chiuso. Spostare il cursore con `CGEvent` e la scorciatoia ⌘⇧I (`toggleNotchOpen`) non lo aprono in modo affidabile: scarta ogni prova con l'app sotto l'1% circa. Per un confronto serio serve aprirlo da codice in una copia di prova, senza cursore.
+- **`NSLog` dall'app arriva come `<private>`** in `log show`. Per un log di prova usa `os.Logger().notice("\(x, privacy: .public)")`.
 - **Più sessioni insieme:** altre sessioni possono modificare questi stessi file. Rileggili prima di modificarli e controlla chi è in esecuzione.
 - **Prove sulla finestra Impostazioni:** una build nuova non ha l'icona nella barra dei menu su macOS 27, quindi va aperta da codice in una copia dei sorgenti. Usa `orderFrontRegardless()`, non `showWindow()`: con il focus la pagina è cambiata da sola tra l'apertura e la cattura (causa non verificata) e una misura è finita su Media. Guarda sempre la cattura, non solo il numero.
 
 ## Lavoro aperto
+- Mascotte di Claude, non provato: con la musica attiva (prende il posto della copertina), con un timer reale, con due sessioni di Claude Code insieme, un Esc vero dopo il passaggio a `~/.claude/sessions` (vedi Registro, "Esc, seconda versione"), il pulsante Connect/Disconnect nella pagina Progress (la logica è provata fuori dall'app). Restano da fare `dullnotch run <comando>` e lo stato di errore.
 - Avanzamento, non provato: download reale da Safari, Chrome e Firefox (provato solo con un `Progress` pubblicato da uno script); ricarica che avanza (la batteria era ferma all'80%); musica attiva con l'interruttore di precedenza acceso e spento; timer in pausa e fine del timer; pagina Progress nelle Impostazioni mai aperta; area sensibile al mouse nello stile Ibrida.
 - Scheda Convert e schede visibili (Registro, 2026-11-08): mai aperte nell'app, da far provare all'utente.
 - Far confermare all'utente la correzione della barra laterale su Widgets (Registro, 2026-11-06): l'istanza in esecuzione è una build precedente.
@@ -226,3 +230,69 @@ Richiesta dell'utente: ridurre il consumo di Lumen con meno fotogrammi e senza o
 ### 2026-11-11 — Release 1.5.0
 - Contiene l'avanzamento nel notch chiuso e la cadenza variabile di Lumen. `MARKETING_VERSION` 1.4.1 → 1.5.0, stessa procedura della 1.4.0. Prova: versione 1.5.0 nell'Info.plist, MacRemote incluso, `codesign` valido, app viva dopo 8 s.
 - README: riga in What's new / Novità, sezione "Progress on the closed notch" / "Avanzamento nel notch chiuso" con tre catture dell'utente (`docs/progress-wings.png`, `-wire.png`, `-hybrid.png`), una riga in Performance / Prestazioni.
+
+### 2026-11-12 — Claude Code nel notch chiuso
+Richiesta dell'utente: mentre Claude Code lavora, la sua mascotte batte su una tastiera. Quando finisce cambia animazione, resta 20 s e poi sparisce. Mentre aspetta input o un permesso non si vede nulla.
+- **Trasporto: notifiche Darwin** (`notifyutil -p dullnotch.agent.working|done|idle`), scelte dall'utente al posto dello schema URL. Non avviano l'app se è chiusa e non aprono un'altra build registrata. `notify_register_dispatch` funziona nella sandbox (stato 0 e notifica ricevuta, verificato con un log).
+- Hook in `~/.claude/settings.json` dell'utente, uniti a quelli esistenti (copia prima della modifica nello scratchpad della sessione). `UserPromptSubmit`, `PreToolUse` e `PostToolUse` mandano `working`; `Stop` manda `done`; `Notification` e `SessionEnd` mandano `idle`. Lo stesso blocco, con un pulsante Copia, è in Impostazioni → Progress → Claude Code.
+- `working` scade dopo 10 minuti senza eventi, perché un'interruzione con Esc non lancia `Stop`. Lo stato è unico per tutte le sessioni (commento `ponytail:`).
+- **Posizione**: Ali, al posto dell'icona; Ibrida, ala destra, e il notch torna simmetrico senza spostamento; Filo con un avanzamento, o nient'altro attivo, ala sinistra con lo scheletro dell'Ibrida; musica, al posto della copertina (scelta dell'utente).
+- Sprite 12 × 11 disegnato con `Canvas`, 6 Hz da `Timer.publish` solo mentre è visibile. Nel "finito" saltella per 2 s, poi la vista non si ridisegna più. I pixel si sovrappongono di 0,3 pt: senza, l'antialiasing lasciava righe tra un pixel e l'altro.
+- Provato con catture sulla Debug: mascotte da sola, i tre stili con un download simulato (file `.part` toccato), il "finito" e la scomparsa dopo 20 s. Provati anche gli hook reali di questa sessione. Musica non provata.
+- Consumo in Release, notch chiuso, 8 letture: app 0,01% senza mascotte, 1,84% mentre batte; WindowServer senza differenze visibili (14% contro 12%, rumore).
+- In esecuzione la Debug di DerivedData; `/Applications/DullNotch.app` è ancora la 1.5.0 senza questa funzione.
+
+### 2026-11-12 — Claude Code: hook con un clic e Esc
+Richiesta dell'utente: risolvere la mascotte che restava in "working" dopo un Esc, senza configurazioni a mano, così che serva anche ad altri utenti.
+- **Esc non lancia nessun hook** (`Stop` no, `StopFailure` è solo per gli errori dell'API). Claude Code però scrive nel transcript `~/.claude/projects/<progetto>/<sessione>.jsonl` una riga `type: user` con `content[0].text` = `[Request interrupted by user…]`, anche nella forma `… for tool use]`. **Dopo quella riga arrivano subito righe di servizio** (`last-prompt`, `ai-title`, `mode`, `system`…): bisogna guardare l'ultima riga `user`/`assistant`, non l'ultima del file. Visto in 6 transcript reali.
+- `claudeInterrupted(since:)` nell'helper: considera i `.jsonl` modificati dopo `since` e conta solo un'interruzione con `timestamp` successivo a `since`. Senza questo controllo, un nuovo prompt subito dopo un Esc potrebbe far sparire la mascotte prima che la sua riga arrivi nel transcript. L'app la interroga ogni 2 s, solo in `working`.
+- `claudeHooks("status"|"install"|"remove")` nell'helper:
+  - segue i symlink e scrive in modo atomico;
+  - salva una sola volta `settings.json.dullnotch-backup`;
+  - toglie ogni hook che contiene `dullnotch.agent.` prima di aggiungere i suoi, quindi sostituisce anche quelli messi a mano;
+  - usa `/usr/bin/notifyutil` con il percorso completo.
+  JSONSerialization riordina le chiavi del file (`sortedKeys`), i valori restano uguali.
+- Il pulsante Copia e il blocco JSON nelle Impostazioni sono stati tolti: ora c'è "Connect Claude Code" / "Disconnect" con lo stato.
+- **Prove**:
+  - Logica dell'helper compilata fuori dall'app (estrai la sezione `// MARK: - Claude Code` più `import Foundation` e uno stub `class BoringNotchXPCHelper: NSObject {}`), sui casi seguenti:
+    - interruzione seguita da righe di servizio: rilevata;
+    - interruzione precedente al turno: ignorata;
+    - nuovo prompt dopo l'interruzione: ignorata;
+    - testo in un `tool_result`: ignorato;
+    - 40 transcript veri: nessun falso positivo.
+  - Install, status e remove eseguiti sul `settings.json` vero: le chiavi non-hook sono rimaste uguali, l'hook di codegraph è conservato, remove lascia solo quello. Ora gli hook sono installati.
+  - Nell'app: mascotte in "working", riga d'interruzione in una cartella di prova in `projects`, mascotte sparita entro 3,5 s.
+  - Helper durante l'interrogazione: 0,45% di un core in Debug.
+
+### 2026-11-12 — Esc, seconda versione, e animazione del martello
+- **La lettura dei transcript non bastava.** L'utente ha premuto Esc due volte su questa sessione (prompt delle 20:04:06 e 20:04:16 in `history.jsonl`) e la mascotte è rimasta. Nel transcript, dopo quei prompt, c'è solo `api-request`: **un Esc prima che Claude scriva qualcosa non lascia nessuna riga `[Request interrupted by user]`**. La riga c'è solo se l'interruzione arriva durante un output o un comando.
+- **Segnale nuovo: `~/.claude/sessions/<pid>.json`.** Claude Code 2.1.322 tiene un file per ogni sessione aperta, con `pid`, `sessionId`, `status` (`busy`/`idle`), `waitingFor` e `statusUpdatedAt`; il codice del binario lo conferma (`e.status==="busy"`, `e.status==="idle"`). `status` è passato a `busy` nello stesso secondo del prompt.
+- **Verificato con un registro in background** (cambi di stato ogni 0,5 s): un Esc riporta `status` a `idle` in circa 3 s; l'utente ha confermato che la mascotte sparisce. Valori visti: `busy`, `shell` (Claude esegue un comando), `waiting` con `waitingFor: "dialog open"`, `idle`. **Contare solo `busy` era sbagliato**: durante un Bash lungo la mascotte sarebbe sparita. Ora l'helper conta tutto ciò che non è `idle`.
+- Non sono riuscito a pilotare una sessione interattiva di Claude Code da `expect`: il terminale resta vuoto, anche con un ambiente pulito, mentre `claude -p` funziona.
+- L'helper ora ha `claudeBusySessions` al posto di `claudeInterrupted`. Conta i file con `status == "busy"` il cui `pid` è vivo (`kill(pid, 0)`); risponde −1 se la cartella manca, cioè con versioni vecchie, e in quel caso resta solo la scadenza di 10 minuti.
+- L'app interroga ogni 2 s mentre è in `working` e nasconde la mascotte dopo **due** controlli di fila senza sessioni occupate. Così un `Stop` che arriva nel frattempo vince, e il "finito" non salta.
+- Tolta la lettura dei transcript e il controllo del `timestamp`.
+- **Animazione**: in `working` si sceglie a caso, a ogni nuovo turno, tra tastiera e martello (proposta A dell'anteprima https://claude.ai/artifact/ERqsdEv8ChmpNFCQcvQyzJ). La scelta sta in `ClaudeAgentStatus.hammers`, non nella vista, perché la vista si ricrea quando cambia il layout del notch. Il martello: su, su, metà, colpo, colpo, metà a 6 Hz, cioè un colpo al secondo; al colpo scintille, blocco illuminato, occhi socchiusi. Viste entrambe nelle catture.
+- **Fine lavoro**: a ogni "finito" si sceglie a caso tra i saltelli e il caffè, la proposta 3 dell'anteprima https://claude.ai/artifact/1cnjbRRnEWtbkVL3Q6C8WK. La scelta sta in `ClaudeAgentStatus.coffee`.
+  - Caffè: tazza fumante con il vapore che alterna due posizioni, occhi socchiusi, un sorso tra il fotogramma 8 e l'11, quando la tazza sale e il vapore si ferma.
+  - **L'animazione di fine lavoro dura tutti i 20 s.** Segnalato dall'utente: "resta fermo con le braccia su". I saltelli duravano 2 s e poi la posa restava ferma per 18 s, quindi sembrava bloccata. Ora c'è un saltello al secondo (fotogrammi 3–4 di ogni 6) e il caffè beve un sorso ogni 4 s, a 6 Hz come in "working".
+  - Trappola nelle prove: una serie di catture ravvicinate cadeva ogni volta sullo stesso fotogramma e sembrava un blocco. Il log del contatore mostrava invece che avanzava. Prima di dire "è bloccato", controlla il contatore.
+  - Verificato con 25 catture 10 s dopo il "finito": la posa cambia. Il caffè lungo tutti i 20 s non è stato visto.
+
+### 2026-11-12 — Verifica complessiva e release 1.6.0
+- **Revisione** delle interazioni con le viste esistenti. Corretti tre punti:
+  - **Interruttore spento**: `set()` torna subito a `hidden`, così l'helper non viene più interrogato.
+  - **HUD in linea** (volume, luminosità) con la mascotte da sola o con l'Ibrida: il notch era spostato di mezza ala anche sotto l'HUD. Ora `progressShift` vale 0 mentre l'HUD è visibile (`inlineHUDShowing`). Il difetto c'era già con l'Ibrida della 1.5.0. Non provato con un HUD vero.
+  - **Commento in testa** a `ClaudeAgentStatus.swift`: era rimasto vecchio.
+- **Accettato, non corretto**:
+  - se la musica è attiva ma `expandingView` mostra altro (né musica né batteria), non compare né la musica né la mascotte;
+  - dopo ogni richiesta di permesso l'animazione di lavoro viene riestratta;
+  - lo stato resta unico per tutte le sessioni.
+- **Regressione** con catture sulla Debug: Ali, Filo e Ibrida con un download simulato, mascotte da sola, interruttore spento con `-claudeAgentEnabled '<false/>'` (nessuna mascotte). Tutto come prima.
+- **Release 1.6.0**:
+  - `MARKETING_VERSION` 1.5.0 → 1.6.0 in quattro punti.
+  - Stessa procedura della 1.4.0, con l'helper XPC e MacRemote inclusi.
+  - `codesign` valido; app viva dopo 8 s, un'istanza.
+  - Mascotte al lavoro: 1,70% di un core in Release.
+- **README**: riga in What's new / Novità, sezione "Claude Code on the closed notch" / "Claude Code nel notch chiuso", una riga in Performance / Prestazioni. Senza immagini.
+- In esecuzione la Release della 1.6.0 dallo scratchpad. `/Applications/DullNotch.app` è ancora la 1.5.0.
