@@ -13,7 +13,7 @@ Memoria di progetto per le sessioni AI. Leggi questo file prima di esplorare il 
 DullNotch è un fork di Boring Notch: app macOS in SwiftUI (minimo macOS 14) che trasforma il notch in un pannello di widget. L'identificativo dell'app è ancora `theboringteam.boringnotch`.
 
 ## Stato attuale (15 novembre 2026)
-**Pomodoro** (non ancora in una release; provato dall'utente nell'app): widget piccolo `pomodoro`, tutto in `components/Notch/PomodoroWidget.swift`. Scelta dei tempi, card che si riempie di colore, attesa di una risposta a ogni scadenza, totali a fine sessione. Sul notch chiuso: filo durante il conto alla rovescia, ala sinistra o goccia a destra alla scadenza. Dettagli nel Registro, 2026-11-15.
+**Pomodoro** (release 1.7.0; provato dall'utente nell'app): widget piccolo `pomodoro`, tutto in `components/Notch/PomodoroWidget.swift`. Scelta dei tempi, card che si riempie di colore, attesa di una risposta a ogni scadenza, totali a fine sessione. Sul notch chiuso: filo durante il conto alla rovescia, ala sinistra o goccia a destra alla scadenza. Dettagli nel Registro, 2026-11-15.
 
 **Claude Code nel notch chiuso** (release 1.6.0): la mascotte di Claude batte sulla tastiera mentre Claude lavora, festeggia per 20 s quando finisce e resta nascosta mentre aspetta. Codice in `components/Notch/ClaudeAgentStatus.swift`, posizione nelle viste in `ContentView` (`agentVisible`, `agentAlone`). Gli hook li installa l'helper XPC con il pulsante "Connect Claude Code" in Impostazioni → Progress. Sempre l'helper rileva l'interruzione con Esc, leggendo lo stato delle sessioni in `~/.claude/sessions`. Dettagli nel Registro, 2026-11-12.
 
@@ -63,7 +63,7 @@ Stati della FSM: `hidden`, `asleep`, `waking`, `hovering`, `fallingAsleep`, `per
 - **Prove sulla finestra Impostazioni:** una build nuova non ha l'icona nella barra dei menu su macOS 27, quindi va aperta da codice in una copia dei sorgenti. Usa `orderFrontRegardless()`, non `showWindow()`: con il focus la pagina è cambiata da sola tra l'apertura e la cattura (causa non verificata) e una misura è finita su Media. Guarda sempre la cattura, non solo il numero.
 
 ## Lavoro aperto
-- Pomodoro: l'utente ha confermato widget, filo, suono e faccia a riposo. Non confermati uno per uno: ala sinistra e goccia alla scadenza, riepilogo, consumo delle onde e della goccia. La sessione si perde chiudendo l'app. Non è in una release: la versione è ancora 1.6.0.
+- Pomodoro: l'utente ha confermato widget, filo, suono e faccia a riposo. Non confermati uno per uno: ala sinistra e goccia alla scadenza, riepilogo, consumo delle onde e della goccia. La sessione si perde chiudendo l'app.
 - Mascotte di Claude, non provato: con la musica attiva (prende il posto della copertina), con un timer reale, con due sessioni di Claude Code insieme, un Esc vero dopo il passaggio a `~/.claude/sessions` (vedi Registro, "Esc, seconda versione"), il pulsante Connect/Disconnect nella pagina Progress (la logica è provata fuori dall'app). Restano da fare `dullnotch run <comando>` e lo stato di errore.
 - Avanzamento, non provato: download reale da Safari, Chrome e Firefox (provato solo con un `Progress` pubblicato da uno script); ricarica che avanza (la batteria era ferma all'80%); musica attiva con l'interruttore di precedenza acceso e spento; timer in pausa e fine del timer; pagina Progress nelle Impostazioni mai aperta; area sensibile al mouse nello stile Ibrida.
 - Scheda Convert e schede visibili (Registro, 2026-11-08): mai aperte nell'app, da far provare all'utente.
@@ -369,4 +369,10 @@ Richiesta dell'utente: i widget disponibili erano su una riga sola da scorrere. 
 ### 2026-11-15 — Pomodoro: README e installazione
 - README (inglese e italiano): riga in tabella, paragrafo e `docs/widget-pomodoro.png`. L'immagine **non è una cattura**: è disegnata dalle viste vere con `ImageRenderer`, da uno script nello scratchpad che compila `PomodoroWidget.swift` insieme a controfigure di `ProgressItem`, `NotchProgressLogic.clock` e `WidgetCard`, e al modulo `Defaults` preso dai prodotti della build (`-I …/Build/Products/Debug` più `Defaults.o`). Utile per altre anteprime di widget senza aprire il notch. Se cambia il widget, l'immagine non lo segue.
 - `/Applications/DullNotch.app` sostituita con una Release compilata dai sorgenti di oggi (procedura della 1.4.0): versione ancora 1.6.0, `codesign` valido, MacRemote incluso, app viva dopo 9 s, un'istanza. L'avviso aggiornamenti non la distingue dalla 1.6.0 pubblicata.
+
+### 2026-11-15 — Release 1.7.0
+- Contiene il widget Pomodoro e il vassoio dei widget su due righe. `MARKETING_VERSION` 1.6.0 → 1.7.0 in quattro punti, stessa procedura della 1.4.0.
+- Prova: versione 1.7.0 nell'Info.plist, `codesign` valido, MacRemote e helper XPC inclusi, zip da 9,7 MB.
+- `/Applications/DullNotch.app` sostituita con la 1.7.0 estratta dallo zip: firma valida, app viva dopo 9 s, un'istanza.
+- La landing page prende da sola lo zip dell'ultima release, ma il suo testo non cita il Pomodoro.
 
