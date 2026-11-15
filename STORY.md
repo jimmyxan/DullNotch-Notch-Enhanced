@@ -384,5 +384,5 @@ Richiesta dell'utente: una parte del sito dedicata ai widget, dinamica e legata 
 - **Telefono** (finestra sotto 700 px): quattro unità verrebbero scalate al 47%, illeggibili. L'anteprima lì ne tiene 2 quasi a grandezza piena, e lo dichiara.
 - Tolte da `.more` le quattro voci sui widget (ora doppioni) e accorciato il testo di "A home you arrange yourself". Aggiunto "Widgets" nella barra in alto.
 - **Se nell'app cambia un widget o se ne aggiunge uno, la pagina non lo segue**: va aggiornato `WIDGETS` in `index.html`.
-- Provato in Chromium con Playwright a 1360 e 390 px: aggiunta, rimozione, rifiuto per mancanza di posto, tutti e dieci i widget visti, Pomodoro da Start al riepilogo, hero ancora funzionante, nessun errore in console, nessuno scorrimento orizzontale. Non provato: Safari, Firefox, tocco reale, tastiera, movimento ridotto. **Non committato né pubblicato**: aspetta il via dell'utente.
+- Provato in Chromium con Playwright a 1360 e 390 px: aggiunta, rimozione, rifiuto per mancanza di posto, tutti e dieci i widget visti, Pomodoro da Start al riepilogo, hero ancora funzionante, nessun errore in console, nessuno scorrimento orizzontale. Non provato: Safari, Firefox, tocco reale, tastiera, movimento ridotto. Pubblicato: commit `9a83cac` su `dullnotch-site`, Vercel lo serve (verificata la risposta HTTP, non la pagina in un browser).
 
