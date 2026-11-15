@@ -56,3 +56,6 @@ build/
 
 # macOS
 .DS_Store
+
+# Landing page: separate private repository (jimmyxan/dullnotch-site)
+DullNotchSite/

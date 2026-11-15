@@ -17,6 +17,8 @@ DullNotch è un fork di Boring Notch: app macOS in SwiftUI (minimo macOS 14) che
 
 **Avanzamento nel notch chiuso** (release 1.5.0): una fonte per volta, in ordine di priorità: timer di Orologio, download, ricarica solo se avanza, quota AI. Tre stili (`wings`, `wire`, `hybrid`), pagina Impostazioni → Progress. Tutto in `components/Notch/NotchProgress.swift`; l'aggancio al notch è in `ContentView` (`progressItem`, `progressWings`, `ProgressLiveActivity`). Dettagli nel Registro, 2026-11-11.
 
+**Landing page** in `DullNotchSite/`, pubblicata su https://dullnotch.vercel.app (progetto Vercel `dullnotch`, account personale). Ha un repository suo, privato: `jimmyxan/dullnotch-site`; in questo repository la cartella è in `.gitignore`. Un solo `index.html` senza build, più `assets/`. Dettagli nel Registro, 2026-11-12.
+
 Lumen, Meteo, barra laterale delle Impostazioni e scheda Convert sono nel commit della **release 1.4.0**. Lumen è inclusa e attiva di default, ma per scelta dell'utente non è ancora citata nel README né nelle note di rilascio.
 
 **Lumen**, la mascotte: una falena-lanterna pixel-art (28 × 20) che si muove sopra, sotto e dietro i widget. Attiva di default (`lumenEnabled`), con interruttore nelle impostazioni dei widget.
@@ -297,3 +299,48 @@ Richiesta dell'utente: risolvere la mascotte che restava in "working" dopo un Es
 - **README**: riga in What's new / Novità, sezione "Claude Code on the closed notch" / "Claude Code nel notch chiuso", una riga in Performance / Prestazioni. Senza immagini.
 - `/Applications/DullNotch.app` sostituita con la 1.6.0, estratta dallo zip della release: firma valida, app viva dopo 8 s, un'istanza, mascotte visibile.
 - README: `docs/claude-code.gif` (934 × 216, 12 fps, 202 fotogrammi, 358 KB) ricavata dal video dell'utente `mergedVIDEO.mp4`. Il video non è nel repo (non tracciato). La GIF è fatta con uno script Swift (AVAssetImageGenerator + ImageIO) nello scratchpad, come quella di Convert.
+
+### 2026-11-12 — Landing page
+- `DullNotchSite/index.html`: pagina statica in inglese, CSS e JS nel file, nessuna dipendenza oltre al font Bricolage Grotesque da Google Fonts. Le immagini in `DullNotchSite/assets/` sono **copie** di quelle in `docs/`, così la cartella si pubblica da sola: se cambi una cattura in `docs/`, ricopiala.
+- L'hero è un notch funzionante: si apre al passaggio del puntatore o al tocco, ha le schede Home, Mixer e Convert, e i pulsanti sotto lo schermo avviano timer, download e mascotte di Claude Code nei tre stili. Gli sprite della mascotte sono copiati da `ClaudeAgentStatus.swift`: se cambiano nell'app, la pagina non li segue.
+- Il 3D è solo CSS, niente three.js. Vedi la voce "Landing page: 3D con lo scroll".
+- I consumi nella pagina vengono da README e "Misure di riferimento". Nella demo i brani sono reali (titolo, durata e copertina da iTunes Search API, copertine 300 px in `assets/covers/`: sono immagini protette da copyright, scelta dell'utente); città, meteo ed eventi del calendario sono inventati.
+- Provato in Chromium con Playwright a 1360 e 390 px: apertura, schede, timer con Ibrida, download fino alla fine, mascotte disegnata, nessun errore in console, nessuno scorrimento orizzontale. Non provato: Safari, Firefox, tocco reale, tastiera, il cursore verticale del Mixer fuori da Chromium.
+- Filo della demo rifatto sulla ricetta di `NotchProgressWire` (traccia nera più tinta al 18%, linea da 2 pt con estremità tonde, sfumatura che finisce sulla punta, alone solo sulla linea). In stile Wire l'icona restava visibile nel notch: la regola che la nascondeva perdeva per specificità. Visto in Chromium, non in Safari. Differenza rimasta: in Wings il download mostra la percentuale, l'app un anello.
+- 2026-11-15: con "Run Claude Code" il notch della demo si allargava da entrambi i lati (268 px centrati). Ora ha la sola ala sinistra, come nell'app e come Hybrid: 232 px spostati di 18 px a sinistra. Non provato in un browser, non ripubblicato su Vercel.
+
+### 2026-11-12 — Landing page: 3D con lo scroll
+Richiesta dell'utente: il MacBook che si apre scorrendo e il notch esploso a strati, adattati a schermi e dispositivi diversi.
+- **MacBook**: `.stage` diventa una pista alta 190svh con dentro `.pin` in `position: sticky`. `onScroll` legge una volta la posizione e scrive variabili CSS (`--lid`, `--tilt`, `--yaw`, `--s`, `--ty`). Due tempi: il coperchio si apre mentre il portatile scende a metà schermo, poi la camera stringe sul notch. L'ultimo 20% della pista è fermo, per usare la demo.
+- **Arrivo (`is-live`)**: le trasformazioni 3D vengono tolte e base e retro del coperchio nascosti. Serve perché sfocatura del vetro e puntatore lavorino su un livello piatto; nell'ultimo fotogramma le trasformazioni sono già l'identità, quindi il passaggio non si vede.
+- **Adattamento**: la scala iniziale è il minimo tra tre limiti (fisso, larghezza, altezza della finestra), così il portatile entra sempre. Sui telefoni lo schermo è largo almeno 560 px e all'arrivo esce dai bordi: il notch resta in px veri e toccabile. Il 3D si attiva solo con finestra alta almeno 620 px e movimento consentito (`want3d`); altrimenti resta la pagina piatta di prima, con il suo ingresso.
+- **Trappola**: `overflow-x: hidden` su `body` insieme a `overflow-x: clip` su `html` rompe lo sticky (il body diventa un contenitore di scorrimento). Entrambi devono essere `clip`.
+- **Trappola nelle prove**: con `scroll-behavior: smooth` uno `scrollTo` da script è ancora in corso dopo 500 ms; un clic fatto prima della fine viene poi annullato dall'apertura automatica. Non è un difetto della pagina.
+- **Notch esploso**: sezione dopo l'hero, quattro strati in vista isometrica (`.stack`), separati da `--e` che segue lo scorrimento. La legenda evidenzia uno strato al passaggio o al focus. Senza pin.
+- Provato in Chromium: 1360×850 (chiuso, metà, arrivo, timer Ibrida), 390×800 (metà e arrivo, nessuno scorrimento orizzontale), 800×400 (ripiego piatto), nessun errore in console. Non provato: Safari, Firefox, tocco reale, fluidità su un telefono vero, `prefers-reduced-motion`.
+
+### 2026-11-12 — Landing page: modello 3D vero del MacBook
+Richiesta dell'utente: il portatile fatto in CSS era brutto; usare il modello che ha messo in `DullNotchSite/macbook-pro-m3-16-inch-2024/` (file `.blend` da Sketchfab più texture).
+- **Conversione**: un browser non legge `.blend`. Blender 4.1 è in `/Applications`; `export-glb.py` (nella cartella del modello) si lancia con `Blender -b <file.blend> --python export-glb.py -- <uscita.glb>`. Toglie il cubo di ingombro, crea un nodo `Lid` sull'asse della cerniera con dentro le parti del coperchio, lo mette verticale, rinomina lo schermo in `Screen`, esporta con texture WebP e compressione Draco. Risultato `assets/macbook.glb`, 888 KB (5,5 MB senza Draco: il peso era la geometria, non le texture).
+- **Pagina**: three.js 0.160 da jsDelivr con import dinamico, solo quando il 3D è attivo. Il portatile CSS è stato tolto. Il modello è disegnato su `#gl`; lo schermo HTML resta fermo nella posizione finale e invisibile.
+- **Aggancio**: la camera finisce dritta davanti allo schermo, alla distanza in cui un'unità del modello copre gli stessi pixel dello schermo HTML (`gl.frame`). Poi lo schermo HTML compare sopra il modello e il canvas sparisce. Sullo schermo del modello è dipinta una copia dello sfondo (`paintWall`: sfumatura, archi, notch chiuso, barra dei menu). Gli archi CSS restano in pausa sul primo fotogramma fino all'arrivo, altrimenti non coincidono. Se cambi sfondo o archi in CSS, aggiorna `paintWall`.
+- **Trappola**: `Box3.setFromObject(screen)` senza `true` dà una scatola troppo profonda, perché la mesh è inclinata dentro il suo nodo: la camera finiva l'11% troppo lontana.
+- **Ripiego**: se three.js o il modello non si caricano, la pagina torna piatta. **Aprendo `index.html` come file il modello non si carica** (il browser blocca la lettura): serve un server, per esempio `python3 -m http.server` nella cartella del sito.
+- Provato in Chromium: 1360×850 (chiuso, in apertura, aperto, arrivo, dissolvenza: schermo del modello e HTML coincidono al pixel) e 390×800 (metà e arrivo), nessun errore in console. Non provato: Safari, Firefox, telefono vero, ripiego senza WebGL.
+- **Da chiarire con l'utente**: licenza e autore del modello (nessun file di licenza nella cartella). La cartella sorgente (11 MB) non va pubblicata.
+- Controlli sotto lo schermo: in 3D ora stanno subito sotto lo schermo (`--pt`, calcolata in `onScroll`), non più in fondo al pin: su finestre alte restava un vuoto. Pulsanti e selettori ingranditi. **Trappola**: `font: … inherit` nella forma abbreviata non è valido e il browser scartava tutta la dichiarazione, quindi i pulsanti usavano il font piccolo di sistema (molto evidente in Safari). Visto in Chromium a 1250×1210.
+- Pulsanti di download: al caricamento la pagina chiede a `api.github.com/…/releases/latest` il primo asset `.zip` e lo mette come `href`, così il clic scarica subito. Il nome del file contiene la versione, quindi `releases/latest/download/<nome>` non si può usare. Se l'API non risponde (limite: 60 richieste l'ora per IP) resta il link alla pagina della release. Verificato in Chromium: entrambi i pulsanti puntano a `DullNotch-1.6.0.zip`; il download vero non è stato avviato.
+
+### 2026-11-12 — Landing page su Vercel
+- Pubblicata in produzione con `vercel deploy --prod --yes --name dullnotch` da `DullNotchSite/`. La cartella è collegata al progetto (`.vercel/`, ignorata da git con il `.gitignore` creato dalla CLI). Non è collegata a GitHub: ogni aggiornamento va ripubblicato a mano con `vercel deploy --prod` dalla stessa cartella.
+- `.vercelignore` esclude `macbook-pro-m3-16-inch-2024` (sorgente del modello). Verificato: `https://dullnotch.vercel.app/` e `/assets/macbook.glb` rispondono 200, il sorgente 404.
+- Non verificato: la pagina pubblicata aperta in un browser (solo risposte HTTP).
+
+### 2026-11-15 — Notch esploso: partenza ritardata
+- Richiesta dell'utente: l'esplosione partiva troppo presto e si vedeva poco. Prima `--e` andava da 0 a 1 con il bordo alto di `.explode` tra il 92% e il 32% della finestra, quindi metà animazione era fuori vista. Ora tra il 65% e il 15% (`onScroll`). Non provato in un browser.
+
+### 2026-11-15 — Sito in un repository separato
+- `DullNotchSite/` ha un `.git` suo, con remoto `jimmyxan/dullnotch-site` (privato, ramo `main`, un commit del 2026-11-12). Qui la cartella è in `.gitignore`.
+- Il sorgente del modello (`macbook-pro-m3-16-inch-2024`, 11 MB) è tracciato nel repository del sito; `.vercelignore` lo tiene fuori dalla pubblicazione.
+- Collegamento Vercel ↔ GitHub: lo fa l'utente. Finché non c'è, vale ancora `vercel deploy --prod` a mano.
+- **Trappola**: `.claude/hooks/story-check.sh` usa `git rev-parse --show-toplevel`. Con la shell dentro `DullNotchSite/` la radice diventa quella del sito, dove `STORY.md` non esiste, e l'hook segnala a ogni stop. Dalla radice invece non vede le modifiche al sito. Non corretto.
