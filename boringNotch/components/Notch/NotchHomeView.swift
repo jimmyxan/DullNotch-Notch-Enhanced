@@ -563,6 +563,8 @@ struct NotchHomeView: View {
             QuoteWidget(large: false)
         case .quoteLarge:
             QuoteWidget(large: true)
+        case .pomodoro:
+            PomodoroWidget()
         case .bluetoothBattery:
             BluetoothBatteryWidget(namespace: batteryNamespace) {
                 withAnimation(expandAnimation) { batteryExpanded = true }
@@ -585,7 +587,7 @@ private extension NotchWidget {
         case .music: return .music
         case .weather: return .weather
         case .quote, .quoteLarge: return .quote
-        case .bluetoothBattery, .calendar, .mirror, .aiUsage, .systemMonitor: return .other
+        case .bluetoothBattery, .calendar, .mirror, .aiUsage, .systemMonitor, .pomodoro: return .other
         }
     }
 

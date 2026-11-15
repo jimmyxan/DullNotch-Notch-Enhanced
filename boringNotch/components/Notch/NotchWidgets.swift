@@ -13,7 +13,7 @@ import SwiftUI
 // MARK: - Model
 
 enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
-    case music, bluetoothBattery, calendar, mirror, weather, aiUsage, systemMonitor, quote, quoteLarge
+    case music, bluetoothBattery, calendar, mirror, weather, aiUsage, systemMonitor, quote, quoteLarge, pomodoro
 
     var id: String { rawValue }
 
@@ -30,7 +30,7 @@ enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
         switch self {
         case .music, .quoteLarge: return 330
         case .calendar: return 210
-        case .bluetoothBattery, .mirror, .weather, .aiUsage, .systemMonitor, .quote: return 150
+        case .bluetoothBattery, .mirror, .weather, .aiUsage, .systemMonitor, .quote, .pomodoro: return 150
         }
     }
 
@@ -54,6 +54,7 @@ enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
         case .systemMonitor: return "System monitor"
         case .quote: return "Quote"
         case .quoteLarge: return "Quote (large)"
+        case .pomodoro: return "Pomodoro"
         }
     }
 
@@ -67,6 +68,7 @@ enum NotchWidget: String, CaseIterable, Identifiable, Defaults.Serializable {
         case .aiUsage: return "gauge.with.dots.needle.67percent"
         case .systemMonitor: return "waveform.path.ecg"
         case .quote, .quoteLarge: return "quote.opening"
+        case .pomodoro: return "timer"
         }
     }
 }
@@ -491,6 +493,7 @@ private struct GenericWidgetTile: View {
             case .systemMonitor: systemMonitor
             case .quote: QuoteContent(quote: QuoteLibrary.all[0], large: false)
             case .quoteLarge: QuoteContent(quote: QuoteLibrary.all[33], large: true)
+            case .pomodoro: PomodoroRunningFace.sample
             }
         }
         .frame(width: widget.width, height: Self.height)
@@ -741,25 +744,35 @@ struct WidgetsSettings: View {
 
     private var tray: some View {
         let available = NotchWidget.allCases.filter { !widgets.contains($0) }
+        // Two rows of about the same length: the first takes widgets until it holds half of the total width.
+        let half = available.reduce(0) { $0 + $1.width } / 2
+        var filled: CGFloat = 0
+        let split = available.firstIndex { w in defer { filled += w.width }; return filled >= half } ?? available.count
+        let rows = [Array(available[..<split]), Array(available[split...])].filter { !$0.isEmpty }
         // scrolls instead of widening the pane: a wide tray squeezed the settings sidebar
-        return ScrollView(.horizontal, showsIndicators: false) { HStack(spacing: 14) {
-            if available.isEmpty {
-                Text("All widgets are in the notch").foregroundStyle(.secondary)
-            }
-            ForEach(available) { w in
-                VStack(spacing: 6) {
-                    tile(w)
-                        .draggable(w.rawValue) { tile(w) }
-                        .opacity(NotchWidget.fits(widgets + [w]) ? 1 : 0.55)
-                    Text(w.title).font(.caption).foregroundStyle(.secondary)
+        return ScrollView(.horizontal, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 12) {
+                if available.isEmpty {
+                    Text("All widgets are in the notch").foregroundStyle(.secondary)
                 }
-                .transition(.scale(scale: 0.6).combined(with: .opacity))
-                .accessibilityLabel("\(w.title), drag into the notch")
+                ForEach(rows, id: \.first) { row in
+                    HStack(spacing: 14) {
+                        ForEach(row) { w in
+                            VStack(spacing: 6) {
+                                tile(w)
+                                    .draggable(w.rawValue) { tile(w) }
+                                    .opacity(NotchWidget.fits(widgets + [w]) ? 1 : 0.55)
+                                Text(w.title).font(.caption).foregroundStyle(.secondary)
+                            }
+                            .transition(.scale(scale: 0.6).combined(with: .opacity))
+                            .accessibilityLabel("\(w.title), drag into the notch")
+                        }
+                    }
+                }
             }
+            .padding(.horizontal, 2)
         }
-        .padding(.horizontal, 2)
-        }
-        .frame(maxWidth: .infinity, minHeight: GenericWidgetTile.height * scale + 30)
+        .frame(maxWidth: .infinity, minHeight: (GenericWidgetTile.height * scale + 30) * 2)
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)

@@ -23,6 +23,7 @@ struct ContentView: View {
     @ObservedObject var batteryModel = BatteryStatusViewModel.shared
     @ObservedObject var progress = NotchProgressManager.shared
     @ObservedObject var agent = ClaudeAgentStatus.shared
+    @ObservedObject var pomodoro = PomodoroManager.shared
     @ObservedObject var brightnessManager = BrightnessManager.shared
     @ObservedObject var volumeManager = VolumeManager.shared
     @State private var hoverTask: Task<Void, Never>?
@@ -55,7 +56,8 @@ struct ContentView: View {
 
     /// Progress that takes the wings. Music keeps them when the setting says so; the AI quota never takes them from music.
     private var progressWings: ProgressItem? {
-        guard let item = progressItem, progressStyle != .wire,
+        // A Pomodoro is always a wire, whatever the style.
+        guard let item = progressItem, progressStyle != .wire, item.source != .pomodoro,
               !(coordinator.expandingView.show && coordinator.expandingView.type == .battery) else { return nil }
         if musicOnClosedNotch && (item.source == .aiQuota || !progressOverridesMusic) { return nil }
         return item
@@ -70,6 +72,18 @@ struct ContentView: View {
     /// Nothing else holds a wing: the mascot gets the left one, Hybrid-style.
     private var agentAlone: Bool {
         agentVisible && progressWings == nil && !musicOnClosedNotch
+            && !(coordinator.expandingView.show && coordinator.expandingView.type == .battery)
+    }
+
+    /// A Pomodoro stretch is over and waits for an answer: its colour, or nil.
+    private var pomodoroWaiting: Color? {
+        guard vm.notchState == .closed, !vm.hideOnClosed, !coordinator.helloAnimationRunning else { return nil }
+        return pomodoro.waitingTint
+    }
+
+    /// Nothing else holds a wing: the signal opens the left one. Otherwise it drips under the right end.
+    private var pomodoroAlone: Bool {
+        pomodoroWaiting != nil && progressWings == nil && !agentVisible && !musicOnClosedNotch
             && !(coordinator.expandingView.show && coordinator.expandingView.type == .battery)
     }
 
@@ -90,7 +104,7 @@ struct ContentView: View {
     /// With the mascot on the right Hybrid is symmetric again and needs no shift.
     private var progressShift: CGFloat {
         if inlineHUDShowing { return 0 } // the HUD takes the whole closed notch, no wing to balance
-        if agentAlone { return -(agentWingWidth + 8) / 2 }
+        if agentAlone || pomodoroAlone { return -(agentWingWidth + 8) / 2 }
         guard let item = progressWings, progressStyle == .hybrid, !agentVisible else { return 0 }
         return -(progressWingWidth(item) + 8) / 2
     }
@@ -132,7 +146,7 @@ struct ContentView: View {
             chinWidth = 640
         } else if let item = progressWings {
             chinWidth += (progressStyle == .hybrid && !agentVisible ? 1 : 2) * progressWingWidth(item) + 20
-        } else if agentAlone {
+        } else if agentAlone || pomodoroAlone {
             chinWidth += agentWingWidth + 20
         } else if (!coordinator.expandingView.show || coordinator.expandingView.type == .music)
             && vm.notchState == .closed && (musicManager.isPlaying || !musicManager.isPlayerIdle)
@@ -199,7 +213,7 @@ struct ContentView: View {
                     )
                     // The wire hugs the notch itself: centred, or on the right when Hybrid adds its wing on the left.
                     .overlay(alignment: progressShift == 0 ? .top : .topTrailing) {
-                        if let item = progressItem, progressStyle != .wings {
+                        if let item = progressItem, progressStyle != .wings || item.source == .pomodoro {
                             NotchProgressWire(item: item)
                                 .frame(
                                     width: vm.closedNotchSize.width - 20 + 2 * cornerRadiusInsets.closed.bottom,
@@ -208,11 +222,20 @@ struct ContentView: View {
                                 .transition(.opacity)
                         }
                     }
+                    .overlay(alignment: .bottomTrailing) {
+                        if let tint = pomodoroWaiting, !pomodoroAlone, !inlineHUDShowing {
+                            PomodoroDrip(tint: tint)
+                                // hangs below the bottom edge, just inside the right corner
+                                .offset(x: -(cornerRadiusInsets.closed.bottom + 10), y: PomodoroDrip.size.height)
+                                .transition(.opacity)
+                        }
+                    }
                     .offset(x: progressShift)
                     .animation(animationSpring, value: openNotchWidth)
                     // Animate on a change of source only: animating every countdown second cost 34% of a core.
                     .animation(.smooth, value: progress.current?.source)
                     .animation(.smooth, value: agentVisible)
+                    .animation(.smooth, value: pomodoroWaiting != nil)
                     .animation(.smooth, value: progressStyle)
                     .conditionalModifier(true) { view in
                         let openAnimation = Animation.spring(response: 0.42, dampingFraction: 0.8, blendDuration: 0)
@@ -386,7 +409,10 @@ struct ContentView: View {
                           ProgressLiveActivity(item)
                               .transition(.opacity)
                       } else if agentAlone {
-                          AgentLiveActivity()
+                          LeftWingActivity { ClaudeMascotView(phase: agent.phase) }
+                              .transition(.opacity)
+                      } else if pomodoroAlone, let tint = pomodoroWaiting {
+                          LeftWingActivity { PomodoroWingGlyph(tint: tint) }
                               .transition(.opacity)
                       } else if (!coordinator.expandingView.show || coordinator.expandingView.type == .music) && vm.notchState == .closed && (musicManager.isPlaying || !musicManager.isPlayerIdle) && coordinator.musicLiveActivityEnabled && !vm.hideOnClosed {
                           MusicLiveActivity()
@@ -534,12 +560,12 @@ struct ContentView: View {
         .frame(height: vm.effectiveClosedNotchHeight, alignment: .center)
     }
 
-    /// Hybrid's skeleton with the mascot in the icon's wing.
+    /// Hybrid's skeleton with something else in the icon's wing: the mascot, or the Pomodoro signal.
     @ViewBuilder
-    func AgentLiveActivity() -> some View {
+    func LeftWingActivity<Glyph: View>(@ViewBuilder _ glyph: () -> Glyph) -> some View {
         let side = max(0, vm.effectiveClosedNotchHeight - 12)
         HStack {
-            ClaudeMascotView(phase: agent.phase)
+            glyph()
                 .frame(width: side, height: side)
                 .frame(width: agentWingWidth, alignment: .leading)
             Rectangle()

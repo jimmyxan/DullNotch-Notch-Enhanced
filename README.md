@@ -84,7 +84,7 @@ When a new version is published on GitHub, DullNotch tells you: **Update Now** o
 | **Mixer** | A new notch tab with one vertical fader per app playing sound (0–150%), native and driver-free. See below. |
 | **Spotify everywhere** | Shows what you are playing on your phone, speakers or TV, even with the Spotify app closed on the Mac. Works with **Spotify Free**, through Last.fm. |
 | **Quiet idle state** | When nothing plays on any device, a calm Spotify card replaces the placeholder track. |
-| **Home widgets** | Build the home like an iPhone widget stack: Music, Calendar, Bluetooth battery, Weather, Mirror, System monitor, AI usage and Quote. Up to 1 large + 2 small; the notch resizes to fit. |
+| **Home widgets** | Build the home like an iPhone widget stack: Music, Calendar, Bluetooth battery, Weather, Mirror, System monitor, AI usage, Quote and Pomodoro. Up to 1 large + 2 small; the notch resizes to fit. |
 | **Bluetooth battery** | AirPods and Beats show left, right and case; other headphones and speakers show one percentage. |
 | **Weather** | Apple-style card with the sky and motion of the current condition. Can stand in for the battery widget while nothing is connected. |
 | **MacRemote** | A new notch tab that starts **[MacRemote](https://github.com/jimmyxan/MacRemote)** and shows the QR code to pair your iPhone. Bundled with the app. |
@@ -96,6 +96,7 @@ When a new version is published on GitHub, DullNotch tells you: **Update Now** o
 | **AI usage** | Your Claude or Codex plan limits at a glance: 5-hour and weekly windows as concentric rings. |
 | **Update notice** | A new GitHub release is announced in the app: update now or get a reminder tomorrow. |
 | **Quote** | A quiet, editorial quote in a small or large widget, changing every 6 hours. |
+| **Pomodoro** | Focus and break timer in a small widget: the card fills with colour as the time goes, the closed notch counts down, and a chime tells you when the focus is over. |
 
 ### Home widgets
 
@@ -123,6 +124,12 @@ The home of the open notch is a set of widgets you choose and arrange in **Setti
 </p>
 
 - **Quote**: a hand-picked line in a serif face, with the author in small caps (hover to see the book, letter or poem it comes from). Two sizes: **Quote** (small) uses short lines, **Quote (large)** takes the place of a large widget and uses longer ones. 86 quotes from Seneca, Marcus Aurelius, Rilke, Mary Oliver, Annie Dillard, Baldwin, Camus, Kafka, Le Guin, Musashi and others, each traced to a written source: no unsourced internet quotes. A new one every 6 hours, each shown once before the cycle starts over; it is worked out from the time, so it costs nothing in the background.
+
+<p align="center">
+  <img src="docs/widget-pomodoro.png" alt="Pomodoro widget in three states: the invitation Start your focus, a focus with 15:32 left and the card half filled with orange, a break with 3:30 left in green" width="620">
+</p>
+
+- **Pomodoro**: point at the widget to pick the focus (15, 25, 45 or 60 minutes) and the break (5, 10 or 15), then press Start. The card fills with colour during the focus and empties during the break; click it to pause. Nothing moves on by itself: when the focus is over a chime plays and you choose between **+5 min** and **Break**; after the break you choose between another **Focus** and **End**, which shows the total focus and break time of the session. On the closed notch the countdown is a line around the notch, and the end of a stretch is signalled until you answer.
 
 ### MacRemote
 
@@ -288,7 +295,7 @@ Quando su GitHub esce una nuova versione, DullNotch te lo dice: **Update Now** a
 | **Mixer** | Una nuova tab del notch con uno slider verticale per ogni app che emette suono (0–150%), nativo e senza driver. Vedi sotto. |
 | **Spotify ovunque** | Mostra cosa ascolti su telefono, casse o TV, anche con l'app Spotify chiusa sul Mac. Funziona con **Spotify Free**, tramite Last.fm. |
 | **Stato di attesa discreto** | Quando non suona nulla su nessun dispositivo, una scheda Spotify sobria sostituisce il brano segnaposto. |
-| **Widget nella home** | Componi la home come i widget di iPhone: Musica, Calendario, Batteria Bluetooth, Meteo, Specchio, Monitor di sistema, Utilizzo AI e Citazione. Fino a 1 grande + 2 piccoli; il notch si adatta. |
+| **Widget nella home** | Componi la home come i widget di iPhone: Musica, Calendario, Batteria Bluetooth, Meteo, Specchio, Monitor di sistema, Utilizzo AI, Citazione e Pomodoro. Fino a 1 grande + 2 piccoli; il notch si adatta. |
 | **Batteria Bluetooth** | AirPods e Beats mostrano sinistra, destra e custodia; altre cuffie e casse una sola percentuale. |
 | **Meteo** | Scheda in stile Apple con il cielo e il movimento della condizione attuale. Può prendere il posto della batteria quando non c'è nulla collegato. |
 | **MacRemote** | Una nuova tab del notch che avvia **[MacRemote](https://github.com/jimmyxan/MacRemote)** e mostra il QR per associare l'iPhone. Inclusa nell'app. |
@@ -300,6 +307,7 @@ Quando su GitHub esce una nuova versione, DullNotch te lo dice: **Update Now** a
 | **Utilizzo AI** | I limiti del tuo piano Claude o Codex a colpo d'occhio: finestra di 5 ore e settimanale come anelli concentrici. |
 | **Avviso aggiornamenti** | Una nuova release su GitHub viene segnalata nell'app: aggiorna subito o ricevi un promemoria il giorno dopo. |
 | **Citazione** | Una citazione sobria ed elegante in un widget piccolo o grande, che cambia ogni 6 ore. |
+| **Pomodoro** | Timer di focus e pausa in un widget piccolo: la scheda si riempie di colore mentre il tempo passa, il notch chiuso fa il conto alla rovescia e un suono avvisa quando il focus è finito. |
 
 ### Widget nella home
 
@@ -325,6 +333,12 @@ La home del notch aperto è un insieme di widget che scegli e disponi in **Impos
 </p>
 
 - **Citazione** (in inglese): una frase scelta a mano in carattere serif, con l'autore in maiuscoletto (passa il mouse per vedere il libro, la lettera o la poesia da cui viene). Due misure: **Quote** (piccolo) usa frasi brevi, **Quote (large)** prende il posto di un widget grande e usa quelle più lunghe. 86 citazioni da Seneca, Marco Aurelio, Rilke, Mary Oliver, Annie Dillard, Baldwin, Camus, Kafka, Le Guin, Musashi e altri, ognuna con una fonte scritta: niente frasi da internet senza origine. Ne arriva una nuova ogni 6 ore, ciascuna una sola volta prima che il giro ricominci; viene calcolata dall'ora, quindi non consuma nulla in background.
+
+<p align="center">
+  <img src="docs/widget-pomodoro.png" alt="Widget Pomodoro in tre stati: l'invito Start your focus, un focus con 15:32 rimasti e la scheda piena a metà di arancione, una pausa con 3:30 rimasti in verde" width="620">
+</p>
+
+- **Pomodoro** (in inglese): passa il mouse sul widget per scegliere il focus (15, 25, 45 o 60 minuti) e la pausa (5, 10 o 15), poi premi Start. La scheda si riempie di colore durante il focus e si svuota durante la pausa; un clic la mette in pausa. Niente va avanti da solo: a focus finito suona un avviso e scegli tra **+5 min** e **Break**; dopo la pausa scegli tra un altro **Focus** e **End**, che mostra il tempo totale di focus e di pausa della sessione. Sul notch chiuso il conto alla rovescia è una linea attorno al notch, e la fine di un tratto resta segnalata finché non rispondi.
 
 ### MacRemote
 

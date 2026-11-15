@@ -3,7 +3,7 @@
 //  boringNotch
 //
 //  Progress of whatever is going on, shown on the closed notch. One source at a time,
-//  by priority: Clock timer, file download, charging (only while it advances), AI quota.
+//  by priority: Pomodoro, Clock timer, file download, charging (only while it advances), AI quota.
 //
 
 import Combine
@@ -13,11 +13,15 @@ import SwiftUI
 
 /// Declaration order is the priority order.
 enum ProgressSource: String, CaseIterable, Identifiable {
-    case timer, download, charging, aiQuota
+    case pomodoro, timer, download, charging, aiQuota
+
+    /// A Pomodoro session is started by hand in its widget, so it has no switch in Settings.
+    static let optional = allCases.filter { $0 != .pomodoro }
 
     var id: String { rawValue }
     var title: String {
         switch self {
+        case .pomodoro: return "Pomodoro"
         case .timer: return "Clock timers"
         case .download: return "Downloads"
         case .charging: return "Charging"
@@ -79,8 +83,9 @@ enum NotchProgressLogic {
         func item(_ s: ProgressSource) -> ProgressItem { ProgressItem(source: s, fraction: 0.5, label: "", icon: "", tint: .white) }
         let all = Set(ProgressSource.allCases)
         let everything = Dictionary(uniqueKeysWithValues: ProgressSource.allCases.map { ($0, item($0)) })
-        assert(pick(everything, enabled: all)?.source == .timer)
-        assert(pick(everything, enabled: all.subtracting([.timer]))?.source == .download)
+        assert(pick(everything, enabled: all)?.source == .pomodoro)
+        assert(pick(everything, enabled: all.subtracting([.pomodoro]))?.source == .timer)
+        assert(pick(everything, enabled: all.subtracting([.pomodoro, .timer]))?.source == .download)
         assert(pick([.charging: item(.charging), .aiQuota: item(.aiQuota)], enabled: all)?.source == .charging)
         assert(pick([.aiQuota: item(.aiQuota)], enabled: all)?.source == .aiQuota)
         assert(pick([.aiQuota: item(.aiQuota)], enabled: [.timer]) == nil)
@@ -148,6 +153,11 @@ final class NotchProgressManager: ObservableObject {
             .sink { [weak self] in self?.recompute() }
             .store(in: &observers)
         downloads.onChange = { [weak self] in self?.recompute() }
+        let pomodoro = PomodoroManager.shared
+        pomodoro.$wire.map { _ in () }.merge(with: pomodoro.$session.map { _ in () })
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.recompute() }
+            .store(in: &observers)
         Defaults.publisher(keys: .progressEnabled, .progressSources, .aiUsageProvider)
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.configure() }
@@ -156,11 +166,12 @@ final class NotchProgressManager: ObservableObject {
 
     /// Starts or stops the sources to match the settings.
     private func configure() {
-        enabled = Defaults[.progressEnabled] ? Set(Defaults[.progressSources]) : []
+        enabled = Defaults[.progressEnabled] ? Set(Defaults[.progressSources]).union([.pomodoro]) : []
 
         // ponytail: one 5 s tick polls the Clock timer and the Downloads folder and expires a stalled
         // charge; a new timer or download can take up to 5 s to appear. Use file events if that's too slow.
-        if enabled.isEmpty {
+        // The Pomodoro tells by itself when it changes: it needs no polling.
+        if enabled.subtracting([.pomodoro]).isEmpty {
             housekeeping?.invalidate()
             housekeeping = nil
         } else if housekeeping == nil {
@@ -208,6 +219,7 @@ final class NotchProgressManager: ObservableObject {
     private func recompute() {
         let now = Date()
         var candidates: [ProgressSource: ProgressItem] = [:]
+        candidates[.pomodoro] = PomodoroManager.shared.progressItem
 
         if let timer = clockTimer, timer.fires > now {
             let left = timer.fires.timeIntervalSince(now)
@@ -477,7 +489,7 @@ struct ProgressSettings: View {
             .disabled(!enabled)
 
             Section {
-                ForEach(Array(ProgressSource.allCases.enumerated()), id: \.element) { index, source in
+                ForEach(Array(ProgressSource.optional.enumerated()), id: \.element) { index, source in
                     Toggle(isOn: binding(for: source)) {
                         HStack(spacing: 6) {
                             Text("\(index + 1). \(source.title)")
@@ -488,7 +500,7 @@ struct ProgressSettings: View {
             } header: {
                 Text("Sources")
             } footer: {
-                Text("Only one is shown at a time. The first one in progress wins, in this order.")
+                Text("Only one is shown at a time. The first one in progress wins, in this order. A Pomodoro session comes before them all and is always a wire.")
             }
             .disabled(!enabled)
 
@@ -508,6 +520,7 @@ struct ProgressSettings: View {
 
     private func hint(for source: ProgressSource) -> String {
         switch source {
+        case .pomodoro: return "A session started in the Pomodoro widget."
         case .timer: return "A timer running in the macOS Clock app."
         case .download: return "A file being downloaded into your Downloads folder."
         case .charging: return "Shown only while the battery level is going up. A charge held at 80% is not shown."

@@ -123,6 +123,7 @@
 		C0FFEE012F00000000000401 /* ClaudeAgentStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000402 /* ClaudeAgentStatus.swift */; };
 		C0FFEE012F00000000000107 /* SystemMonitorWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000108 /* SystemMonitorWidget.swift */; };
 		C0FFEE012F00000000000109 /* QuoteWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000010A /* QuoteWidget.swift */; };
+		C0FFEE012F00000000000501 /* PomodoroWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F00000000000502 /* PomodoroWidget.swift */; };
 		C0FFEE012F0000000000010B /* LumenBrain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000010C /* LumenBrain.swift */; };
 		C0FFEE012F0000000000010D /* LumenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000010E /* LumenView.swift */; };
 		C0FFEE012F0000000000020D /* ConverterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE012F0000000000020E /* ConverterView.swift */; };
@@ -304,6 +305,7 @@
 		C0FFEE012F00000000000402 /* ClaudeAgentStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeAgentStatus.swift; sourceTree = "<group>"; };
 		C0FFEE012F00000000000108 /* SystemMonitorWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMonitorWidget.swift; sourceTree = "<group>"; };
 		C0FFEE012F0000000000010A /* QuoteWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteWidget.swift; sourceTree = "<group>"; };
+		C0FFEE012F00000000000502 /* PomodoroWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroWidget.swift; sourceTree = "<group>"; };
 		C0FFEE012F0000000000010C /* LumenBrain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LumenBrain.swift; sourceTree = "<group>"; };
 		C0FFEE012F0000000000010E /* LumenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LumenView.swift; sourceTree = "<group>"; };
 		C0FFEE012F0000000000020E /* ConverterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConverterView.swift; sourceTree = "<group>"; };
@@ -739,6 +741,7 @@
 				C0FFEE012F00000000000402 /* ClaudeAgentStatus.swift */,
 				C0FFEE012F00000000000108 /* SystemMonitorWidget.swift */,
 				C0FFEE012F0000000000010A /* QuoteWidget.swift */,
+				C0FFEE012F00000000000502 /* PomodoroWidget.swift */,
 				C0FFEE012F0000000000010C /* LumenBrain.swift */,
 				C0FFEE012F0000000000010E /* LumenView.swift */,
 				C0FFEE012F0000000000020E /* ConverterView.swift */,
@@ -1027,6 +1030,7 @@
 				C0FFEE012F00000000000401 /* ClaudeAgentStatus.swift in Sources */,
 				C0FFEE012F00000000000107 /* SystemMonitorWidget.swift in Sources */,
 				C0FFEE012F00000000000109 /* QuoteWidget.swift in Sources */,
+				C0FFEE012F00000000000501 /* PomodoroWidget.swift in Sources */,
 				C0FFEE012F0000000000010B /* LumenBrain.swift in Sources */,
 				C0FFEE012F0000000000010D /* LumenView.swift in Sources */,
 				C0FFEE012F0000000000020D /* ConverterView.swift in Sources */,
