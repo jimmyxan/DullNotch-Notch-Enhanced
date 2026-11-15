@@ -376,3 +376,13 @@ Richiesta dell'utente: i widget disponibili erano su una riga sola da scorrere. 
 - `/Applications/DullNotch.app` sostituita con la 1.7.0 estratta dallo zip: firma valida, app viva dopo 9 s, un'istanza.
 - La landing page prende da sola lo zip dell'ultima release, ma il suo testo non cita il Pomodoro.
 
+### 2026-11-15 — Landing page: sezione Widgets interattiva
+Richiesta dell'utente: una parte del sito dedicata ai widget, dinamica e legata a quelli davvero implementati.
+- Sezione `#widgets` tra il notch esploso e "Five things": un notch aperto con dentro i widget **a grandezza vera** (150, 210 o 330 px per 126) e sotto una pastiglia per ognuno dei dieci casi di `NotchWidget`. Premere una pastiglia mette o toglie il widget; il notch cambia larghezza con la stessa somma di `homeWidth`. Vale il limite dell'app: 4 unità, Music e Quote (large) ne contano 2; se non c'è posto la pastiglia trema e una riga spiega.
+- I widget sono vivi: Music è lo stesso lettore dell'hero (ora legati da `data-m` e `data-mc`, non più da id), System monitor ha un grafico che avanza ogni secondo (cammino casuale), Quote mostra la fonte al passaggio del puntatore, **Pomodoro funziona davvero** con le stesse fasi dell'app e un minuto che dura un secondo. Calendar usa la data di oggi. Dati e numeri sono di esempio, e la pagina lo dice. Mirror non chiede la fotocamera.
+- I widget non nel notch stanno in `#gPark` (`hidden`), non staccati dal documento: così gli aggiornamenti li trovano sempre.
+- **Telefono** (finestra sotto 700 px): quattro unità verrebbero scalate al 47%, illeggibili. L'anteprima lì ne tiene 2 quasi a grandezza piena, e lo dichiara.
+- Tolte da `.more` le quattro voci sui widget (ora doppioni) e accorciato il testo di "A home you arrange yourself". Aggiunto "Widgets" nella barra in alto.
+- **Se nell'app cambia un widget o se ne aggiunge uno, la pagina non lo segue**: va aggiornato `WIDGETS` in `index.html`.
+- Provato in Chromium con Playwright a 1360 e 390 px: aggiunta, rimozione, rifiuto per mancanza di posto, tutti e dieci i widget visti, Pomodoro da Start al riepilogo, hero ancora funzionante, nessun errore in console, nessuno scorrimento orizzontale. Non provato: Safari, Firefox, tocco reale, tastiera, movimento ridotto. **Non committato né pubblicato**: aspetta il via dell'utente.
+
