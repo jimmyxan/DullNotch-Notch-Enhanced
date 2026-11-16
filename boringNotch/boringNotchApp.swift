@@ -28,10 +28,11 @@ struct DynamicNotchApp: App {
         SettingsWindowController.shared.setUpdaterController(updaterController)
     }
 
-    /// macOS 27+ owns visibility via System Settings → Menu Bar. A two-way binding lets SwiftUI
-    /// write the system's hide/show back into `menubarIcon`, which then fights the switch.
+    /// macOS 27+ owns visibility via System Settings → Menu Bar, and `MenuBarExtra` re-inserts its
+    /// item on every scene update, overriding that switch and Hidden Bar. There AppDelegate builds a
+    /// plain NSStatusItem instead (`setUpStatusItem`), so the SwiftUI item stays out.
     private var menuBarIconInserted: Binding<Bool> {
-        if #available(macOS 27, *) { return .constant(true) }
+        if #available(macOS 27, *) { return .constant(false) }
         return $showMenuBarIcon
     }
 
@@ -287,6 +288,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if #available(macOS 27, *) { setUpStatusItem() }
         SystemMonitor.shared.activate()
         UpdateChecker.shared.activate()
         #if DEBUG
@@ -565,6 +567,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func showMenu() {
         statusItem?.menu?.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
     }
+
+    /// macOS 27+ only. Never touch `isVisible`: the system and menu-bar hiders own it.
+    private func setUpStatusItem() {
+        let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        item.autosaveName = "dullnotch_statusitem"
+        item.button?.image = NSImage(systemSymbolName: "sparkle", accessibilityDescription: "DullNotch")
+        let menu = NSMenu()
+        for (title, action, key) in [
+            ("Settings", #selector(openSettingsAction), ","),
+            ("Check for Updates…", #selector(checkUpdatesAction), ""),
+            ("-", nil, ""),
+            ("Restart DullNotch", #selector(restartAction), ""),
+            ("Quit", #selector(quitAction), "q"),
+        ] as [(String, Selector?, String)] {
+            if title == "-" { menu.addItem(.separator()); continue }
+            let entry = NSMenuItem(title: title, action: action, keyEquivalent: key)
+            entry.target = self
+            menu.addItem(entry)
+        }
+        item.menu = menu
+        statusItem = item
+    }
+
+    @objc func openSettingsAction() { SettingsWindowController.shared.showWindow() }
+    @objc func checkUpdatesAction() { Task { await UpdateChecker.shared.check(manual: true) } }
+    @objc func restartAction() { ApplicationRelauncher.restart() }
 
     @objc func quitAction() {
         NSApplication.shared.terminate(self)
