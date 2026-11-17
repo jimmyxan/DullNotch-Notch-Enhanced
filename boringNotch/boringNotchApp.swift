@@ -435,6 +435,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         setupDragDetectors()
 
+        let updated = isNewVersion()  // also records this version, first launch included
+        if updated && !coordinator.firstLaunch {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { UpdateBanner.show() }
+        }
+
         if coordinator.firstLaunch {
             DispatchQueue.main.async {
                 self.showOnboardingWindow()

@@ -51,3 +51,44 @@ struct UpdaterSettingsView: View {
         }
     }
 }
+
+/// Shown once after the app version changes (Sparkle installs updates on quit, so this is the next launch):
+/// a small pill under the notch for 4 s. Onboarding and the hello animation only run on the first launch ever.
+@MainActor
+enum UpdateBanner {
+    private static var panel: NSPanel?
+
+    static func show() {
+        guard let screen = NSScreen.screens.first(where: { $0.safeAreaInsets.top > 0 }) ?? NSScreen.main else { return }
+        let version = Bundle.main.releaseVersionNumber ?? ""
+        let view = NSHostingView(rootView:
+            Label("DullNotch updated to \(version)", systemImage: "checkmark.seal.fill")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(.black, in: Capsule()))
+        let size = view.fittingSize
+        let p = NSPanel(contentRect: NSRect(x: screen.frame.midX - size.width / 2,
+                                            y: screen.visibleFrame.maxY - 8 - size.height,
+                                            width: size.width, height: size.height),
+                        styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
+        p.level = .statusBar
+        p.isOpaque = false
+        p.backgroundColor = .clear
+        p.hasShadow = false
+        p.ignoresMouseEvents = true
+        p.collectionBehavior = [.canJoinAllSpaces, .stationary]
+        p.contentView = view
+        p.alphaValue = 0
+        p.orderFrontRegardless()
+        panel = p
+        NSAnimationContext.runAnimationGroup { $0.duration = 0.3; p.animator().alphaValue = 1 }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            NSAnimationContext.runAnimationGroup({ $0.duration = 0.4; p.animator().alphaValue = 0 }) {
+                p.orderOut(nil)
+                panel = nil
+            }
+        }
+    }
+}
