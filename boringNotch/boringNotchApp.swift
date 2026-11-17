@@ -21,8 +21,7 @@ struct DynamicNotchApp: App {
     let updaterController: SPUStandardUpdaterController
 
     init() {
-        updaterController = SPUStandardUpdaterController(
-            startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+        updaterController = Updater.controller
 
         // Initialize the settings window controller with the updater controller
         SettingsWindowController.shared.setUpdaterController(updaterController)
@@ -290,9 +289,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         if #available(macOS 27, *) { setUpStatusItem() }
         SystemMonitor.shared.activate()
-        UpdateChecker.shared.activate()
+        RemoteAnimations.shared.activate()
         #if DEBUG
-        _ = UpdateChecker.selfCheck
+        _ = RemoteAnimations.selfCheck
         #endif
 
         NotificationCenter.default.addObserver(
@@ -591,7 +590,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func openSettingsAction() { SettingsWindowController.shared.showWindow() }
-    @objc func checkUpdatesAction() { Task { await UpdateChecker.shared.check(manual: true) } }
+    @objc func checkUpdatesAction() { Updater.controller.checkForUpdates(nil) }
     @objc func restartAction() { ApplicationRelauncher.restart() }
 
     @objc func quitAction() {

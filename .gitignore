@@ -62,3 +62,6 @@ DullNotchSite/
 
 # Project memory for AI sessions: internal use
 STORY.md
+
+# Private keys (Sparkle EdDSA): never pushed
+secrets/

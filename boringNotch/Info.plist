@@ -11,13 +11,15 @@
 	<true/>
 	<key>SUEnableInstallerLauncherService</key>
 	<true/>
-	<!-- Remake: the feed below is upstream Boring Notch; automatic checks are off so an upstream update never replaces this build. -->
+	<!-- DullNotch: appcast.xml is attached to every GitHub release; latest/download always points at the newest one. -->
 	<key>SUEnableAutomaticChecks</key>
-	<false/>
+	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
 	<key>SUFeedURL</key>
-	<string>https://TheBoredTeam.github.io/boring.notch/appcast.xml</string>
+	<string>https://github.com/jimmyxan/DullNotch-Notch-Enhanced/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
-	<string>B1Y47t8C/v8ImurYA+9arEsuCrpxwJSviekiflMElbI=</string>
+	<string>WP60wMIHrdLfWZtOoM1c3xXMs/0/Q87nyOSxwgJ4phw=</string>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict/>

@@ -18,11 +18,39 @@ let appVersion = "\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as
 let temporaryDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
 let spacing: CGFloat = 16
 
-struct CustomVisualizer: Codable, Hashable, Equatable, Defaults.Serializable {
-    let UUID: UUID
-    var name: String
-    var url: URL
-    var speed: CGFloat = 1.0
+/// What plays next to the album art in the closed notch while music is on.
+enum MusicVisualizer: String, CaseIterable, Defaults.Serializable {
+    case none, spectrogram, silkWave, pulseRings, vinyl, orbit, orbit3D, dotMatrix, breathingOrb, voice
+
+    var title: String {
+        switch self {
+        case .none: "None"
+        case .spectrogram: "Spectrogram"
+        case .silkWave: "Silk Wave"
+        case .pulseRings: "Pulse Rings"
+        case .vinyl: "Vinyl"
+        case .orbit: "Orbit"
+        case .orbit3D: "3D Orbit"
+        case .dotMatrix: "Dot Matrix"
+        case .breathingOrb: "Breathing Orb"
+        case .voice: "Voice"
+        }
+    }
+
+    /// Data asset in Assets.xcassets holding the Lottie JSON; nil for the non-Lottie choices.
+    var lottieAsset: String? {
+        switch self {
+        case .none, .spectrogram: nil
+        case .silkWave: "SilkWave"
+        case .pulseRings: "PulseRings"
+        case .vinyl: "Vinyl"
+        case .orbit: "Orbit"
+        case .orbit3D: "Orbit3D"
+        case .dotMatrix: "DotMatrix"
+        case .breathingOrb: "BreathingOrb"
+        case .voice: "Voice"
+        }
+    }
 }
 
 enum CalendarSelectionState: Codable, Defaults.Serializable {
@@ -118,9 +146,9 @@ extension Defaults.Keys {
         default: SliderColorEnum.white
     )
     static let playerColorTinting = Key<Bool>("playerColorTinting", default: true)
-    static let useMusicVisualizer = Key<Bool>("useMusicVisualizer", default: true)
-    static let customVisualizers = Key<[CustomVisualizer]>("customVisualizers", default: [])
-    static let selectedVisualizer = Key<CustomVisualizer?>("selectedVisualizer", default: nil)
+    static let musicVisualizer = Key<MusicVisualizer>("musicVisualizer", default: .spectrogram)
+    /// Id of a downloaded animation (`RemoteAnimations`); when set it wins over `musicVisualizer`.
+    static let remoteVisualizer = Key<String>("remoteVisualizer", default: "")
     
     // MARK: Gestures
     static let enableGestures = Key<Bool>("enableGestures", default: true)

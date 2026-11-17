@@ -36,7 +36,8 @@ struct ContentView: View {
 
     @Namespace var albumArtNamespace
 
-    @Default(.useMusicVisualizer) var useMusicVisualizer
+    @Default(.musicVisualizer) var musicVisualizer
+    @Default(.remoteVisualizer) var remoteVisualizer
 
     @Default(.showNotHumanFace) var showNotHumanFace
     @Default(.homeWidgets) var homeWidgets
@@ -645,7 +646,12 @@ struct ContentView: View {
                 )
 
             HStack {
-                if useMusicVisualizer {
+                if !remoteVisualizer.isEmpty {
+                    LottieView(animation: RemoteAnimations.shared.animation(remoteVisualizer), playing: musicManager.isPlaying)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                switch musicVisualizer {
+                case .spectrogram:
                     Rectangle()
                         .fill(
                             Defaults[.coloredSpectrogram]
@@ -658,9 +664,14 @@ struct ContentView: View {
                             AudioSpectrumView(isPlaying: $musicManager.isPlaying)
                                 .frame(width: 16, height: 12)
                         }
-                } else {
-                    LottieAnimationContainer()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                case .none:
+                    EmptyView()
+                default:
+                    if let asset = musicVisualizer.lottieAsset {
+                        LottieView(animation: LottieView.bundled(asset), playing: musicManager.isPlaying)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
                 }
             }
             .frame(
