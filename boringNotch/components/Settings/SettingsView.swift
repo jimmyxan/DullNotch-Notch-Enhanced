@@ -20,9 +20,9 @@ struct SettingsView: View {
     @State private var selectedTab = SettingsTab.general
     /// Set when the scroll moved the selection, so the change doesn't scroll back.
     @State private var selectionFromScroll = false
-    /// Top of each category title, in window coordinates (last known value).
-    @State private var titleTops: [SettingsTab: CGFloat] = [:]
-    @State private var formTop: CGFloat = 0
+    /// Scroll geometry. A plain class, not @State: it changes every frame while scrolling,
+    /// and as @State each change re-evaluated this whole view (all twelve pages).
+    @State private var scroll = ScrollTracking()
     @State private var accentColorUpdateTrigger = UUID()
 
     let updaterController: SPUStandardUpdaterController?
@@ -53,10 +53,12 @@ struct SettingsView: View {
                         page(tab)
                     }
                 }
-                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { formTop = $0 }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { scroll.formTop = $0 }
                 .onAppear { proxy.scrollTo(selectedTab, anchor: .top) }
                 .onChange(of: selectedTab) { _, tab in
                     if selectionFromScroll { selectionFromScroll = false; return }
+                    // While the animated scroll runs, the old title is still on top: don't follow it.
+                    scroll.followPausedUntil = .now + 0.7
                     withAnimation(.smooth) { proxy.scrollTo(tab, anchor: .top) }
                 }
             }
@@ -99,18 +101,19 @@ struct SettingsView: View {
             .foregroundStyle(.primary)
             .padding(.top, tab == SettingsTab.allCases.first ? 0 : 18)
             .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
-                titleTops[tab] = top
+                scroll.titleTops[tab] = top
                 followScroll()
             }
             // Rows off screen may be dropped by the Form: remember which side they left from.
             .onDisappear {
-                if let top = titleTops[tab] { titleTops[tab] = top < formTop + 80 ? -.infinity : .infinity }
+                if let top = scroll.titleTops[tab] { scroll.titleTops[tab] = top < scroll.formTop + 80 ? -.infinity : .infinity }
             }
     }
 
     /// The category whose title last passed the top of the pane.
     private func followScroll() {
-        let passed = SettingsTab.allCases.last { (titleTops[$0] ?? .infinity) <= formTop + 80 } ?? .general
+        guard Date.now >= scroll.followPausedUntil else { return }
+        let passed = SettingsTab.allCases.last { (scroll.titleTops[$0] ?? .infinity) <= scroll.formTop + 80 } ?? .general
         guard passed != selectedTab else { return }
         selectionFromScroll = true
         selectedTab = passed
@@ -132,6 +135,14 @@ struct SettingsView: View {
         case .about: About()
         }
     }
+}
+
+private final class ScrollTracking {
+    /// Top of each category title, in window coordinates (last known value).
+    var titleTops: [SettingsTab: CGFloat] = [:]
+    var formTop: CGFloat = 0
+    /// ponytail: fixed pause sized to the .smooth scroll (~0.5 s); tie it to scroll end if that animation changes.
+    var followPausedUntil = Date.distantPast
 }
 
 enum SettingsTab: String, CaseIterable, Identifiable {
