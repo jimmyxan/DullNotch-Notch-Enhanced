@@ -874,7 +874,7 @@ struct GeneralDropTargetDelegate: DropDelegate {
 /// whose opacity follows `glassIntensity`, plus a top fade so the hardware-notch band melts into the glass.
 /// The backdrop is composited by WindowServer (no screen capture, no per-frame CPU work) and only
 /// exists while the notch is open and glass is enabled.
-private struct NotchBackground: View {
+struct NotchBackground: View {
     let isOpen: Bool
     let shape: NotchShape
     let notchHeight: CGFloat

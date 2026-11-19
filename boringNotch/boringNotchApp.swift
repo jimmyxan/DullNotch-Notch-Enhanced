@@ -243,7 +243,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let styleMask: NSWindow.StyleMask = [.borderless, .nonactivatingPanel, .utilityWindow, .hudWindow]
         
         let window = BoringNotchSkyLightWindow(contentRect: rect, styleMask: styleMask, backing: .buffered, defer: false)
-        
+
+        // A window rebuilt while the notch is open (screen lock, display change) never gets drops
+        // into Convert or the Shelf again: start every new window closed.
+        viewModel.close()
+
         // Enable SkyLight only when screen is locked
         if isScreenLocked {
             window.enableSkyLight()

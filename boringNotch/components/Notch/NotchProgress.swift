@@ -41,6 +41,13 @@ enum ProgressStyle: String, CaseIterable, Identifiable {
         case .hybrid: return "Hybrid"
         }
     }
+    var hint: String {
+        switch self {
+        case .wings: return "Wings: icon on the left, ring or time on the right."
+        case .wire: return "Wire: a line that runs around the notch; the notch keeps its size."
+        case .hybrid: return "Hybrid: the line, plus one icon on the left."
+        }
+    }
 }
 
 struct ProgressItem: Equatable {
@@ -484,7 +491,7 @@ struct ProgressSettings: View {
             } header: {
                 Text("Appearance")
             } footer: {
-                Text(styleHint + " The AI quota never replaces music.")
+                Text(style.hint + " The AI quota never replaces music.")
             }
             .disabled(!enabled)
 
@@ -510,13 +517,6 @@ struct ProgressSettings: View {
         .navigationTitle("Progress")
     }
 
-    private var styleHint: String {
-        switch style {
-        case .wings: return "Wings: icon on the left, ring or time on the right."
-        case .wire: return "Wire: a line that runs around the notch; the notch keeps its size."
-        case .hybrid: return "Hybrid: the line, plus one icon on the left."
-        }
-    }
 
     private func hint(for source: ProgressSource) -> String {
         switch source {
