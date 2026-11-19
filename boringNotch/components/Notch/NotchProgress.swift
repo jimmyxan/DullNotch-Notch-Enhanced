@@ -473,7 +473,7 @@ struct ProgressSettings: View {
     @ObservedObject private var progress = NotchProgressManager.shared
 
     var body: some View {
-        Form {
+        Group {
             Section {
                 Toggle("Show progress on the closed notch", isOn: $enabled)
                 LabeledContent("Showing now") {
@@ -514,7 +514,6 @@ struct ProgressSettings: View {
             ClaudeAgentSettingsSection()
         }
         .accentColor(.effectiveAccent)
-        .navigationTitle("Progress")
     }
 
 

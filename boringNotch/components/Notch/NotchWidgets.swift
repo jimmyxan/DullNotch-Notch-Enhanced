@@ -596,7 +596,7 @@ struct WidgetsSettings: View {
     private var used: Int { widgets.reduce(0) { $0 + $1.units } }
 
     var body: some View {
-        Form {
+        Group {
             Section {
                 VStack(spacing: 18) {
                     notchPreview
@@ -662,7 +662,6 @@ struct WidgetsSettings: View {
                 }
             }
         }
-        .navigationTitle("Widgets")
         .onAppear {
             #if DEBUG
             _ = NotchWidget.dropSelfCheck

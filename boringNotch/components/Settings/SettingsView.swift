@@ -14,8 +14,15 @@ import Sparkle
 import SwiftUI
 import SwiftUIIntrospect
 
+/// One continuous page: every category is a block of sections in a single Form.
+/// The sidebar follows the scroll and a click in it scrolls to that category.
 struct SettingsView: View {
-    @State private var selectedTab = "General"
+    @State private var selectedTab = SettingsTab.general
+    /// Set when the scroll moved the selection, so the change doesn't scroll back.
+    @State private var selectionFromScroll = false
+    /// Top of each category title, in window coordinates (last known value).
+    @State private var titleTops: [SettingsTab: CGFloat] = [:]
+    @State private var formTop: CGFloat = 0
     @State private var accentColorUpdateTrigger = UUID()
 
     let updaterController: SPUStandardUpdaterController?
@@ -27,47 +34,10 @@ struct SettingsView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $selectedTab) {
-                NavigationLink(value: "General") {
-                    Label("General", systemImage: "gear")
-                }
-                NavigationLink(value: "Appearance") {
-                    Label("Appearance", systemImage: "eye")
-                }
-                NavigationLink(value: "Widgets") {
-                    Label("Widgets", systemImage: "square.grid.2x2")
-                }
-                NavigationLink(value: "Media") {
-                    Label("Media", systemImage: "play.laptopcomputer")
-                }
-                NavigationLink(value: "Calendar") {
-                    Label("Calendar", systemImage: "calendar")
-                }
-                NavigationLink(value: "HUD") {
-                    Label("HUDs", systemImage: "dial.medium.fill")
-                }
-                NavigationLink(value: "Progress") {
-                    Label("Progress", systemImage: "chart.bar.fill")
-                }
-                NavigationLink(value: "Battery") {
-                    Label("Battery", systemImage: "battery.100.bolt")
-                }
-//                NavigationLink(value: "Downloads") {
-//                    Label("Downloads", systemImage: "square.and.arrow.down")
-//                }
-                NavigationLink(value: "Shelf") {
-                    Label("Shelf", systemImage: "books.vertical")
-                }
-                NavigationLink(value: "Shortcuts") {
-                    Label("Shortcuts", systemImage: "keyboard")
-                }
-                // NavigationLink(value: "Extensions") {
-                //     Label("Extensions", systemImage: "puzzlepiece.extension")
-                // }
-                NavigationLink(value: "Advanced") {
-                    Label("Advanced", systemImage: "gearshape.2")
-                }
-                NavigationLink(value: "About") {
-                    Label("About", systemImage: "info.circle")
+                ForEach(SettingsTab.allCases) { tab in
+                    NavigationLink(value: tab) {
+                        Label(tab.title, systemImage: tab.icon)
+                    }
                 }
             }
             .listStyle(SidebarListStyle())
@@ -75,40 +45,25 @@ struct SettingsView: View {
             .toolbar(removing: .sidebarToggle)
             .navigationSplitViewColumnWidth(200)
         } detail: {
-            Group {
-                switch selectedTab {
-                case "General":
-                    GeneralSettings()
-                case "Appearance":
-                    Appearance()
-                case "Widgets":
-                    WidgetsSettings()
-                case "Media":
-                    Media()
-                case "Calendar":
-                    CalendarSettings()
-                case "HUD":
-                    HUD()
-                case "Progress":
-                    ProgressSettings()
-                case "Battery":
-                    Charge()
-                case "Shelf":
-                    Shelf()
-                case "Shortcuts":
-                    Shortcuts()
-                case "Extensions":
-                    GeneralSettings()
-                case "Advanced":
-                    Advanced()
-                case "About":
-                    About(updaterController: updaterController ?? Updater.controller)
-                default:
-                    GeneralSettings()
+            ScrollViewReader { proxy in
+                Form {
+                    ForEach(SettingsTab.allCases) { tab in
+                        Section {} header: { title(tab) }
+                            .id(tab)
+                        page(tab)
+                    }
+                }
+                .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { formTop = $0 }
+                .onAppear { proxy.scrollTo(selectedTab, anchor: .top) }
+                .onChange(of: selectedTab) { _, tab in
+                    if selectionFromScroll { selectionFromScroll = false; return }
+                    withAnimation(.smooth) { proxy.scrollTo(tab, anchor: .top) }
                 }
             }
+            .accentColor(.effectiveAccent)
             // minWidth 0: a page wider than the pane must not push the sidebar off the window's left edge.
             .frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
+            .navigationTitle(selectedTab.title)
         }
         .navigationSplitViewStyle(.balanced)
         .toolbar(removing: .sidebarToggle)
@@ -118,14 +73,90 @@ struct SettingsView: View {
                     .frame(width: 0, height: 0)
                     .accessibilityHidden(true)
             }
+            ToolbarItem {
+                CheckForUpdatesView()
+            }
+            ToolbarItem {
+                Button("Quit app") { NSApp.terminate(nil) }
+            }
         }
         .formStyle(.grouped)
         .frame(width: 700)
         .background(Color(NSColor.windowBackgroundColor))
         .tint(.effectiveAccent)
         .id(accentColorUpdateTrigger)
+        // The HUD category's accessibility status stays live while the window is open.
+        .onAppear { XPCHelperClient.shared.startMonitoringAccessibilityAuthorization() }
+        .onDisappear { XPCHelperClient.shared.stopMonitoringAccessibilityAuthorization() }
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AccentColorChanged"))) { _ in
             accentColorUpdateTrigger = UUID()
+        }
+    }
+
+    private func title(_ tab: SettingsTab) -> some View {
+        Label(tab.title, systemImage: tab.icon)
+            .font(.title2.weight(.semibold))
+            .foregroundStyle(.primary)
+            .padding(.top, tab == SettingsTab.allCases.first ? 0 : 18)
+            .onGeometryChange(for: CGFloat.self) { $0.frame(in: .global).minY } action: { top in
+                titleTops[tab] = top
+                followScroll()
+            }
+            // Rows off screen may be dropped by the Form: remember which side they left from.
+            .onDisappear {
+                if let top = titleTops[tab] { titleTops[tab] = top < formTop + 80 ? -.infinity : .infinity }
+            }
+    }
+
+    /// The category whose title last passed the top of the pane.
+    private func followScroll() {
+        let passed = SettingsTab.allCases.last { (titleTops[$0] ?? .infinity) <= formTop + 80 } ?? .general
+        guard passed != selectedTab else { return }
+        selectionFromScroll = true
+        selectedTab = passed
+    }
+
+    @ViewBuilder private func page(_ tab: SettingsTab) -> some View {
+        switch tab {
+        case .general: GeneralSettings()
+        case .appearance: Appearance()
+        case .widgets: WidgetsSettings()
+        case .media: Media()
+        case .calendar: CalendarSettings()
+        case .hud: HUD()
+        case .progress: ProgressSettings()
+        case .battery: Charge()
+        case .shelf: Shelf()
+        case .shortcuts: Shortcuts()
+        case .advanced: Advanced()
+        case .about: About()
+        }
+    }
+}
+
+enum SettingsTab: String, CaseIterable, Identifiable {
+    case general, appearance, widgets, media, calendar, hud, progress, battery, shelf, shortcuts, advanced, about
+    var id: Self { self }
+    var title: String {
+        switch self {
+        case .hud: "HUDs"
+        default: rawValue.capitalized
+        }
+    }
+    var icon: String {
+        switch self {
+        case .general: "gear"
+        case .appearance: "eye"
+        case .widgets: "square.grid.2x2"
+        case .media: "play.laptopcomputer"
+        case .calendar: "calendar"
+        case .hud: "dial.medium.fill"
+        case .progress: "chart.bar.fill"
+        case .battery: "battery.100.bolt"
+        case .shelf: "books.vertical"
+        case .shortcuts: "keyboard"
+        case .advanced: "gearshape.2"
+        case .about: "info.circle"
         }
     }
 }
@@ -187,7 +218,7 @@ struct GeneralSettings: View {
     
 
     var body: some View {
-        Form {
+        Group {
             Section {
                 // macOS 27+: controlled by System Settings → Menu Bar instead.
                 if #available(macOS 27, *) {} else {
@@ -329,14 +360,7 @@ struct GeneralSettings: View {
 
             gestureControls()
         }
-        .toolbar {
-            Button("Quit app") {
-                NSApp.terminate(self)
-            }
-            .controlSize(.extraLarge)
-        }
         .accentColor(.effectiveAccent)
-        .navigationTitle("General")
         .onChange(of: openNotchOnHover) {
             if !openNotchOnHover {
                 enableGestures = true
@@ -416,7 +440,7 @@ struct GeneralSettings: View {
 
 struct Charge: View {
     var body: some View {
-        Form {
+        Group {
             Section {
                 Defaults.Toggle(key: .showBatteryIndicator) {
                     Text("Show battery indicator")
@@ -444,7 +468,6 @@ struct Charge: View {
             }
         }
         .accentColor(.effectiveAccent)
-        .navigationTitle("Battery")
     }
 }
 
@@ -551,7 +574,7 @@ struct HUD: View {
     }
     
     var body: some View {
-        Form {
+        Group {
             Section {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
@@ -672,15 +695,8 @@ struct HUD: View {
             .disabled(!Defaults[.hudReplacement])
         }
         .accentColor(.effectiveAccent)
-        .navigationTitle("HUDs")
         .task {
             accessibilityAuthorized = await XPCHelperClient.shared.isAccessibilityAuthorized()
-        }
-        .onAppear {
-            XPCHelperClient.shared.startMonitoringAccessibilityAuthorization()
-        }
-        .onDisappear {
-            XPCHelperClient.shared.stopMonitoringAccessibilityAuthorization()
         }
         .onReceive(NotificationCenter.default.publisher(for: .accessibilityAuthorizationChanged)) { notification in
             if let granted = notification.userInfo?["granted"] as? Bool {
@@ -703,7 +719,7 @@ struct Media: View {
     @Default(.enableLyrics) var enableLyrics
 
     var body: some View {
-        Form {
+        Group {
             Section {
                 Picker("Music Source", selection: $mediaController) {
                     ForEach(availableMediaControllers) { controller in
@@ -810,7 +826,6 @@ struct Media: View {
             }
         }
         .accentColor(.effectiveAccent)
-        .navigationTitle("Media")
     }
 
     // Only show controller options that are available on this macOS version
@@ -830,7 +845,7 @@ struct CalendarSettings: View {
     @Default(.autoScrollToNextEvent) var autoScrollToNextEvent
 
     var body: some View {
-        Form {
+        Group {
             Defaults.Toggle(key: .hideCompletedReminders) {
                 Text("Hide completed reminders")
             }
@@ -915,7 +930,6 @@ struct CalendarSettings: View {
             }
         }
         .accentColor(.effectiveAccent)
-        .navigationTitle("Calendar")
         .onAppear {
             Task {
                 await calendarManager.checkCalendarAuthorization()
@@ -944,78 +958,49 @@ func lighterColor(from nsColor: NSColor, amount: CGFloat = 0.14) -> Color {
 
 struct About: View {
     @State private var showBuildNumber: Bool = false
-    let updaterController: SPUStandardUpdaterController
-    @Environment(\.openWindow) var openWindow
+
     var body: some View {
-        VStack {
-            Form {
-                Section {
-                    HStack {
-                        Text("Release name")
-                        Spacer()
-                        Text(Defaults[.releaseName])
-                            .foregroundStyle(.secondary)
-                    }
-                    HStack {
-                        Text("Version")
-                        Spacer()
-                        if showBuildNumber {
-                            Text("(\(Bundle.main.buildVersionNumber ?? ""))")
-                                .foregroundStyle(.secondary)
-                        }
-                        Text(Bundle.main.releaseVersionNumber ?? "unkown")
-                            .foregroundStyle(.secondary)
-                    }
-                    .onTapGesture {
-                        withAnimation {
-                            showBuildNumber.toggle()
-                        }
-                    }
-                } header: {
-                    Text("Version info")
-                }
-
-                UpdaterSettingsView()
-
-                HStack(spacing: 30) {
-                    Spacer(minLength: 0)
-                    Button {
-                        if let url = URL(string: "https://github.com/jimmyxan/DullNotch-Notch-Enhanced") {
-                            NSWorkspace.shared.open(url)
-                        }
-                    } label: {
-                        VStack(spacing: 5) {
-                            Image("Github")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 18)
-                            Text("GitHub")
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    Spacer(minLength: 0)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-            VStack(spacing: 0) {
-                Divider()
-                Text("Made with 🫶🏻 by not so boring not.people")
+        Group {
+            Section {
+                Text("DullNotch turns the MacBook notch into a small home for widgets: music, calendar, weather, timers, downloads, file conversion and more, right where your eyes already are.")
+                Text("It is a personal remake of [Boring Notch](https://github.com/TheBoredTeam/boring.notch) by TheBoredTeam, redesigned for Liquid Glass and extended with new features. Not affiliated with TheBoredTeam; all credit for the original app goes to them.")
                     .foregroundStyle(.secondary)
-                    .padding(.top, 5)
-                    .padding(.bottom, 7)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 10)
+            } header: {
+                Text("What is DullNotch")
             }
-            .frame(maxWidth: .infinity, alignment: .center)
+
+            Section {
+                HStack {
+                    Text("Version")
+                    Spacer()
+                    if showBuildNumber {
+                        Text("(\(Bundle.main.buildVersionNumber ?? ""))")
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(Bundle.main.releaseVersionNumber ?? "unknown")
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation {
+                        showBuildNumber.toggle()
+                    }
+                }
+                Link(destination: URL(string: "https://github.com/jimmyxan/DullNotch-Notch-Enhanced")!) {
+                    HStack {
+                        Image("Github")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 16)
+                        Text("DullNotch on GitHub")
+                    }
+                }
+            } header: {
+                Text("Version info")
+            }
+
+            UpdaterSettingsView()
         }
-        .toolbar {
-            //            Button("Welcome window") {
-            //                openWindow(id: "onboarding")
-            //            }
-            //            .controlSize(.extraLarge)
-            CheckForUpdatesView()
-        }
-        .navigationTitle("About")
     }
 }
 
@@ -1035,7 +1020,7 @@ struct Shelf: View {
     }
     
     var body: some View {
-        Form {
+        Group {
             Section {
                 Defaults.Toggle(key: .boringShelf) {
                     Text("Enable shelf")
@@ -1124,7 +1109,6 @@ struct Shelf: View {
             }
         }
         .accentColor(.effectiveAccent)
-        .navigationTitle("Shelf")
     }
 }
 
@@ -1276,7 +1260,7 @@ struct Appearance: View {
     let icons: [String] = ["logo2"]
     @State private var selectedIcon: String = "logo2"
     var body: some View {
-        Form {
+        Group {
             Section {
                 Toggle("Always show tabs", isOn: $coordinator.alwaysShowTabs)
                 Defaults.Toggle(key: .settingsIconInNotch) {
@@ -1347,7 +1331,6 @@ struct Appearance: View {
             }
         }
         .accentColor(.effectiveAccent)
-        .navigationTitle("Appearance")
     }
 }
 
@@ -1391,7 +1374,7 @@ struct Advanced: View {
     }
     
     var body: some View {
-        Form {
+        Group {
             Section {
                 VStack(alignment: .leading, spacing: 16) {
                     // Toggle between system and custom
@@ -1572,7 +1555,6 @@ struct Advanced: View {
             }
         }
         .accentColor(.effectiveAccent)
-        .navigationTitle("Advanced")
         .onAppear {
             loadCustomColor()
         }
@@ -1737,7 +1719,7 @@ struct AccentCircleButton: View {
 
 struct Shortcuts: View {
     var body: some View {
-        Form {
+        Group {
             Section {
                 KeyboardShortcuts.Recorder("Toggle Sneak Peek:", name: .toggleSneakPeek)
             } header: {
@@ -1755,7 +1737,6 @@ struct Shortcuts: View {
             }
         }
         .accentColor(.effectiveAccent)
-        .navigationTitle("Shortcuts")
     }
 }
 
